@@ -95,6 +95,7 @@ describe('OidcTokenVerifier', () => {
     ['an expired token', { expirationTime: 0 }],
     ['a token that is not valid yet', { notBefore: '5m' }],
     ['a missing subject', { subject: null }],
+    ['an empty subject', { subject: '' }],
   ] as const)('rejects %s', async (_caseName, overrides) => {
     const token = await signToken(signingContext, overrides);
 
