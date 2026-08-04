@@ -13,7 +13,7 @@ transcripts/   Session logs and verification evidence
 
 ## Status
 
-The npm-workspaces monorepo and NestJS/React application baselines are scaffolded. The Prisma/PostgreSQL model, authentication boundary, atomic user provisioning, `GET /me`, and complete owner-scoped Collection and Bookmark APIs are implemented and adversarially reviewed. Product UI, real browser authentication, CI, and optional bonuses are not implemented yet.
+The npm-workspaces monorepo, complete owner-scoped backend API, and adversarial security boundary are implemented. The frontend now has its React Router application shell, MUI/Tailwind integration, Auth0 PKCE boundary, protected routes, in-memory token handling, authenticated API client, TanStack Query, and `/me` foundation. Core collection/bookmark screens, real Auth0 smoke verification, CI, and optional bonuses remain.
 
 ## Confidentiality
 
@@ -49,6 +49,19 @@ The default local connection is documented in `backend/.env.example`. Override `
 The API accepts only Bearer access tokens issued for the configured API audience. It validates the signature through the issuer JWKS plus exact issuer, audience, expiry/not-before, RS256 algorithm, and subject claims. An ID token whose audience is the frontend client is rejected. Configure the public OIDC values in `backend/.env` from `backend/.env.example`; do not store tokens or client secrets there.
 
 On the first valid request, the API atomically creates a user mapped by `(issuer, subject)`. `GET /me` returns only the internal user profile and never returns the external identity pair.
+
+## Frontend Setup
+
+Copy `frontend/.env.example` to the ignored `frontend/.env` file and replace only the SPA Client ID placeholder with the company-provided public Client ID:
+
+```shell
+Copy-Item frontend/.env.example frontend/.env
+npm run dev --workspace=frontend
+```
+
+The Auth0 SPA application must allow `http://localhost:5173/callback` as a callback URL and `http://localhost:5173` as an allowed logout URL and web origin. The frontend uses Authorization Code Flow with PKCE through the Auth0 React SDK, requests the API audience, and keeps Access Tokens in SDK-managed memory only. Do not put a Client Secret, password, or token in any frontend environment variable.
+
+The backend accepts browser requests only from `FRONTEND_ORIGIN`, defaulting to `http://localhost:5173`. Override it for another trusted frontend deployment.
 
 ## Collections
 

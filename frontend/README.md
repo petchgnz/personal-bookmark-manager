@@ -1,32 +1,29 @@
-# React + TypeScript + Vite
+# Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React 19 + Vite 8 SPA using React Router 8, MUI 9, Tailwind CSS 4, Auth0 React SDK, and TanStack Query.
 
-Currently, two official plugins are available:
+## Configure
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```powershell
+Copy-Item .env.example .env
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Replace `VITE_AUTH0_CLIENT_ID` with the company-provided SPA Client ID. The domain, API audience, and local API URL are public defaults from the assignment. Never add a Client Secret, password, Access Token, or ID Token.
+
+Required Auth0 application URLs:
+
+- Callback: `http://localhost:5173/callback`
+- Logout: `http://localhost:5173`
+- Web origin: `http://localhost:5173`
+
+## Run and verify
+
+```powershell
+npm run dev --workspace=frontend
+npm test --workspace=frontend
+npm run typecheck --workspace=frontend
+npm run lint --workspace=frontend
+npm run build --workspace=frontend
+```
+
+The Access Token cache is memory-only. Protected requests obtain a token silently for `https://bbl-candidate-test-api` and attach it through the centralized API client.
