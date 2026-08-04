@@ -13,7 +13,7 @@ transcripts/   Session logs and verification evidence
 
 ## Status
 
-The npm-workspaces monorepo, complete owner-scoped backend API, and adversarial security boundary are implemented. The frontend now has its React Router application shell, MUI/Tailwind integration, Auth0 PKCE boundary, protected routes, in-memory token handling, authenticated API client, TanStack Query, and `/me` foundation. Core collection/bookmark screens, real Auth0 smoke verification, CI, and optional bonuses remain.
+The npm-workspaces monorepo, complete owner-scoped backend API, adversarial security boundary, and required frontend flows are implemented. The frontend supports authenticated collection and bookmark list/detail/create/delete flows, filters, pagination, confirmations, and explicit loading/error/empty states. Final end-to-end verification, documentation audit, and optional bonuses remain.
 
 ## Confidentiality
 
@@ -67,9 +67,13 @@ The backend accepts browser requests only from `FRONTEND_ORIGIN`, defaulting to 
 
 Authenticated clients can create, list, view, replace, patch, and delete collections under `/collections`. Lists use `page`/`limit` offset pagination with defaults `1`/`20` and a maximum limit of `100`. Missing and cross-owner resources both return the same `404`; pagination rows and totals never include another user's collections. See `API_DESIGN.md` for the exact contract.
 
+The frontend supports collection list, detail, create, and confirmed delete flows. Deletion clearly states that contained bookmarks survive as uncategorised bookmarks.
+
 ## Bookmarks
 
 Authenticated clients can manage bookmarks under `/bookmarks`, filter by `collectionId` or `uncategorised=true`, and list an owned collection through `/collections/:id/bookmarks`. URLs accept only absolute HTTP/HTTPS values. Every row, total, mutation, and relation check is owner-scoped; external collection relations and bookmark resources are hidden behind the same `404` behavior as missing data.
+
+The frontend supports bookmark list, detail, create, and confirmed delete flows, plus collection and uncategorised filters. External links open in a separate browsing context with `noopener noreferrer` protection.
 
 ## Verification
 
