@@ -33,7 +33,7 @@ export function CollectionFormDialog({ open, onClose }: { open: boolean; onClose
   return <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
     <DialogTitle>Create collection</DialogTitle>
     <DialogContent className="space-y-4">
-      <TextField autoFocus fullWidth margin="dense" label="Name" value={name} slotProps={{ htmlInput: { maxLength: 120 } }} onChange={(event) => setName(event.target.value)} error={name.length > 0 && !trimmedName} helperText={`${name.length}/120`} />
+      <TextField autoFocus fullWidth margin="dense" label="Name" value={name} slotProps={{ inputLabel: { shrink: true }, input: { notched: true }, htmlInput: { maxLength: 120 } }} onChange={(event) => setName(event.target.value)} error={name.length > 0 && !trimmedName} helperText={`${name.length}/120`} />
       {createCollection.isError && <Alert severity="error">{message}</Alert>}
     </DialogContent>
     <DialogActions><Button disabled={createCollection.isPending} onClick={handleClose}>Cancel</Button><Button loading={createCollection.isPending} disabled={!trimmedName} variant="contained" onClick={handleSubmit}>Create</Button></DialogActions>

@@ -32,6 +32,7 @@
 7. Updated README, AI workflow evidence, and this transcript before the full repository verification.
 8. The first full verification failed because the project PostgreSQL container was stopped. Confirmed the empty Compose state, started only the existing `postgres` service without resetting its volume, reran the narrow database suite, and reran the full gate successfully.
 9. User manual testing passed create, filter, pagination, delete, persistence, and CORS behavior but exposed collapsed MUI TextField labels/padding in both create dialogs. Removed Tailwind preflight from the shared CSS baseline and made MUI CssBaseline authoritative while retaining Tailwind theme/utilities.
+10. A second manual screenshot showed that empty single-line outlined fields still did not enter the floating-label/notched state, while multiline and select fields rendered correctly. Made the `Name`, `URL`, and `Title` label/notch behavior explicit and added DOM regression coverage for the empty state.
 
 ## 3. Code/Logic Created or Modified
 
@@ -51,6 +52,7 @@
 - The first production build after adding screens produced a larger single chunk. Route-level lazy loading split the pages and removed the chunk-size warning.
 - The first `npm run verify` reached `test:db` and failed during Prisma cleanup because `docker compose ps` showed no running project service. Starting the existing PostgreSQL service restored the test environment; the narrow database suite and complete verification then passed without code or schema changes.
 - Manual screenshots showed Tailwind's native form reset interfering with MUI outlined fields even though the documented layer order was present. The fix removed the competing preflight rather than adding per-dialog spacing overrides, keeping MUI responsible for component normalization and Tailwind responsible for utilities.
+- After the baseline correction, empty single-line fields still rendered their labels on the border in the user's browser. Explicit MUI slot contracts now keep those labels shrunk and their outlines notched from first render; tests assert the resulting `data-shrink` state.
 
 ## 5. Security and Privacy Review
 

@@ -39,8 +39,8 @@ export function BookmarkFormDialog({ open, initialCollectionId, onClose }: { ope
   return <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
     <DialogTitle>Create bookmark</DialogTitle>
     <DialogContent><Stack spacing={2} className="pt-2">
-      <TextField autoFocus required label="URL" type="url" value={url} slotProps={{ htmlInput: { maxLength: 2048 } }} onChange={(event) => setUrl(event.target.value)} />
-      <TextField required label="Title" value={title} slotProps={{ htmlInput: { maxLength: 300 } }} onChange={(event) => setTitle(event.target.value)} />
+      <TextField autoFocus required label="URL" type="url" value={url} slotProps={{ inputLabel: { shrink: true }, input: { notched: true }, htmlInput: { maxLength: 2048 } }} onChange={(event) => setUrl(event.target.value)} />
+      <TextField required label="Title" value={title} slotProps={{ inputLabel: { shrink: true }, input: { notched: true }, htmlInput: { maxLength: 300 } }} onChange={(event) => setTitle(event.target.value)} />
       <TextField label="Notes" multiline minRows={3} value={notes} slotProps={{ htmlInput: { maxLength: 10000 } }} onChange={(event) => setNotes(event.target.value)} />
       <TextField select label="Collection" value={collectionId} disabled={collections.isPending || Boolean(initialCollectionId)} onChange={(event) => setCollectionId(event.target.value)}>
         <MenuItem value="">Uncategorised</MenuItem>{collections.data?.data.map((collection) => <MenuItem key={collection.id} value={collection.id}>{collection.name}</MenuItem>)}
