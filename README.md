@@ -13,7 +13,7 @@ transcripts/   Session logs and verification evidence
 
 ## Status
 
-The npm-workspaces monorepo and NestJS/React application baselines are scaffolded. The Prisma/PostgreSQL model, authentication boundary, atomic user provisioning, authenticated `GET /me`, and complete owner-scoped Collection CRUD API are implemented. Bookmark resources, their ownership controls, and product UI are not implemented yet.
+The npm-workspaces monorepo and NestJS/React application baselines are scaffolded. The Prisma/PostgreSQL model, authentication boundary, atomic user provisioning, `GET /me`, and complete owner-scoped Collection and Bookmark APIs are implemented. Product UI, real browser authentication, CI, and optional bonuses are not implemented yet.
 
 ## Confidentiality
 
@@ -53,6 +53,10 @@ On the first valid request, the API atomically creates a user mapped by `(issuer
 ## Collections
 
 Authenticated clients can create, list, view, replace, patch, and delete collections under `/collections`. Lists use `page`/`limit` offset pagination with defaults `1`/`20` and a maximum limit of `100`. Missing and cross-owner resources both return the same `404`; pagination rows and totals never include another user's collections. See `API_DESIGN.md` for the exact contract.
+
+## Bookmarks
+
+Authenticated clients can manage bookmarks under `/bookmarks`, filter by `collectionId` or `uncategorised=true`, and list an owned collection through `/collections/:id/bookmarks`. URLs accept only absolute HTTP/HTTPS values. Every row, total, mutation, and relation check is owner-scoped; external collection relations and bookmark resources are hidden behind the same `404` behavior as missing data.
 
 ## Verification
 

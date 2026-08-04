@@ -77,3 +77,13 @@ Reason: controller-level checks or separate existence prechecks can disclose ano
 Decision: use a global validation pipe and exception filter to reject unknown fields and emit a safe `{ statusCode, code, message, details? }` contract. Request IDs remain deferred because adding them now would require request-context plumbing without improving the core privacy behavior.
 
 Impact: Collection PUT requires the full editable shape (`name`); PATCH changes only an explicit `name`, while omitted/empty or explicit `null` input is invalid. No database schema change was required.
+
+## 2026-08-04 - Bookmark Filters, Validation, and Relation Authorization
+
+Decision: bookmark lists accept either `collectionId=<uuid>` or `uncategorised=true`, never both. `uncategorised=false` is rejected because it is ambiguous with an omitted filter. Full-text search remains bonus scope. Pagination retains the Collection defaults and maximum.
+
+Decision: URLs must be trimmed absolute HTTP/HTTPS URLs up to 2,048 characters; titles are trimmed non-empty strings up to 300; notes are nullable trimmed strings up to 10,000. The notes limit is an API safety constraint over PostgreSQL `TEXT` and does not require a schema migration.
+
+Decision: any non-null `collectionId` is checked with `(id, ownerId)` inside the same transaction as bookmark creation/update. Bookmark mutations and read-backs also include the authenticated `ownerId`; nested routes authorize the collection and scope rows/totals by both owner and collection.
+
+Reason: these predicates prevent mass assignment and cross-owner relation creation while ensuring filters, totals, and nested endpoints do not reveal another user's private data. Missing and foreign relations deliberately share the same safe response.
