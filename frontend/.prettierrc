@@ -4,5 +4,6 @@
   "jsxSingleQuote": true,
   "trailingComma": "all",
   "printWidth": 80,
+  "endOfLine": "lf",
   "experimentalTernaries": true
 }

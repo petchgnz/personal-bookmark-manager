@@ -13,13 +13,13 @@ transcripts/   Session logs and verification evidence
 
 ## Status
 
-The npm-workspaces monorepo, complete owner-scoped backend API, adversarial security boundary, and required frontend flows are implemented. The frontend supports authenticated collection and bookmark list/detail/create/delete flows, filters, pagination, confirmations, and explicit loading/error/empty states. Final end-to-end verification, documentation audit, and optional bonuses remain.
+The core assignment is implemented: npm workspaces, PostgreSQL persistence, the complete owner-scoped API, Auth0 PKCE frontend authentication, required collection/bookmark screens, adversarial privacy tests, and deterministic CI verification. Optional edit UI and bonus features remain intentionally deferred.
 
 ## Confidentiality
 
 Do not commit the confidential source assignment PDF, rendered PDF pages, local environment files, Auth0 credentials, tokens, cookies, database dumps, or temporary artifacts.
 
-## Planned Stack
+## Technology Stack
 
 - npm workspaces
 - Backend: Node.js, TypeScript, NestJS, Prisma, PostgreSQL
@@ -83,6 +83,22 @@ With the PostgreSQL container running and migrated:
 npm run verify
 ```
 
-The command runs lint, TypeScript checks, unit tests, PostgreSQL-backed database and authentication integration tests, and production builds. Database tests use isolated records and clean up their own data; they do not delete seed data.
+The command runs the frontend format check, lint, TypeScript checks, unit tests, PostgreSQL-backed database and authentication integration tests, and production builds. Database tests use isolated records and clean up their own data; they do not delete seed data.
 
 Frontend `.tsx` files use the committed Prettier configuration. Run `npm run format --workspace=frontend` to apply it; `npm run verify` includes a non-mutating format check.
+
+See `VERIFICATION.md` for the security review, two-user privacy matrix, real Auth0 smoke evidence, migration/seed checks, and external CI evidence boundary.
+
+## Continuous Integration
+
+GitHub Actions runs on pushes to `main`/`dev` and on pull requests. Each run installs the committed lockfile with `npm ci`, starts an isolated PostgreSQL 17 service, applies the committed migration, runs the deterministic seed, and executes `npm run verify`. CI does not use real Auth0 credentials; token-validation tests use controlled local keys.
+
+## Completed and Deferred Scope
+
+Completed core scope includes all required backend verbs, owner-scoped filters and nested routes, collection/bookmark list/detail/create/delete UI, pagination, destructive confirmations, real Auth0 login/callback/logout smoke testing, and two-user privacy verification.
+
+Deferred by design:
+
+- Frontend PUT/PATCH edit screens. The fully tested backend endpoints remain available.
+- Sharing, because the assignment requires personal private resources; its design is recorded in `DECISIONS.md`.
+- `/all`, application Dockerfiles, and PostgreSQL full-text search until the core quality gate is confirmed.
