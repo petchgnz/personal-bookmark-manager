@@ -71,9 +71,9 @@ No credentials, raw tokens, cookies, or screenshots containing authentication ma
 - `prisma migrate status` confirms the local database is up to date with the one committed migration.
 - The deterministic seed uses stable IDs and upserts two distinct users, their private collections/bookmarks, and an uncategorised bookmark.
 - The seed completed successfully twice in succession during Session 10, proving the fixture process is repeatable against the current local database.
-- GitHub Actions provisions a fresh PostgreSQL 17 service, applies the committed migration, runs the seed, and executes the repository gate.
+- GitHub Actions provisions a fresh PostgreSQL 17 service, generates the ignored Prisma Client output, applies the committed migration, runs the seed, and executes the repository gate.
 
-The workflow syntax is locally parsed and formatted. A GitHub-hosted run remains external evidence and must not be described as passing until the branch is pushed and the check completes successfully.
+The first GitHub-hosted run exposed a clean-runner ordering gap: the seed imported the ignored generated Prisma Client before any generation step had run. The workflow now generates the client explicitly before migration and seed. The corrected workflow syntax and repository gate are verified locally, but the corrected GitHub-hosted run remains external evidence and must not be described as passing until the branch is pushed and the check completes successfully.
 
 ## Deferred Scope
 
