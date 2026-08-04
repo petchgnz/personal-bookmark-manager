@@ -97,3 +97,21 @@ Reason: the internal identity mapping requires a meaningful non-empty subject. A
 Decision: maintain an adversarial regression suite that enumerates every controller route without credentials, checks that invalid token values are not echoed, verifies unexpected errors are normalized, compares foreign and missing filter behavior, and exercises a concurrent Bookmark-create/Collection-delete race.
 
 Impact: no route was made public, no schema or dependency changed, and no sensitive logging was added. The concurrency result is deliberately either successful creation followed by `SET NULL`, or a safe Collection `404`; a `500` or orphan relation is invalid.
+
+## 2026-08-04 - Frontend Authentication and Server-State Foundation
+
+Decision: use `@auth0/auth0-react` with Authorization Code Flow plus PKCE, API audience configuration, a dedicated `/callback` route, and SDK-managed memory caching. Do not use Implicit Flow, `localStorage`, a Client Secret, or custom token persistence.
+
+Reason: the SDK handles PKCE, callback validation, token renewal, and in-memory caching for a public SPA. The frontend requests an API Access Token and the centralized API client attaches it immediately before each request; ID Tokens are never used as Bearer credentials.
+
+Decision: wrap the app with React Router, Auth0, a single application QueryClient, and MUI theme providers. Create a fresh QueryClient per test when query behavior is tested. Use MUI as the component system and Tailwind v4 utilities for layout, with explicit CSS layer ordering and MUI `enableCssLayer`.
+
+Decision: fail closed with a visible configuration error when any required `VITE_*` public value is missing. Permit browser API requests only from `FRONTEND_ORIGIN`; untrusted origins receive no CORS grant.
+
+Trade-off: the initial production JavaScript chunk is about 621 KB before gzip (about 191 KB gzip), triggering Vite's 500 KB advisory. Route-level code splitting is deferred to Session 9 when real feature pages provide meaningful split boundaries; this is a performance warning, not a correctness failure.
+
+### Local Port Correction
+
+The company Auth0 application allows only `http://localhost:3000/callback` and `http://localhost:3000` logout. Because the React SPA handles the PKCE callback, the frontend—not the resource API—must own port 3000. Vite is fixed to port 3000 with `strictPort`, NestJS moves to port 3001, the frontend API base URL becomes port 3001, and CORS trusts only the frontend on port 3000.
+
+This supersedes the initial Session 8 assumption that Vite could remain on its default port 5173. No Auth0 Dashboard access or configuration change is required.

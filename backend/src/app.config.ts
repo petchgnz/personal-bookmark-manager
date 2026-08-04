@@ -4,7 +4,9 @@ import {
   type INestApplication,
   type ValidationError,
 } from '@nestjs/common';
+import type { CustomOrigin } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { ApiExceptionFilter } from './common/api-exception.filter';
+import { ConfigService } from '@nestjs/config';
 
 function flattenValidationErrors(
   errors: ValidationError[],
@@ -25,6 +27,19 @@ function flattenValidationErrors(
 }
 
 export function configureApp(app: INestApplication): void {
+  const configService = app.get(ConfigService);
+  const frontendOrigin =
+    configService.get<string>('FRONTEND_ORIGIN') ?? 'http://localhost:3000';
+  const allowFrontendOrigin: CustomOrigin = (requestOrigin, callback) =>
+    callback(
+      null,
+      requestOrigin === undefined || requestOrigin === frontendOrigin,
+    );
+  app.enableCors({
+    origin: allowFrontendOrigin,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Authorization', 'Content-Type'],
+  });
   app.enableShutdownHooks();
   app.useGlobalPipes(
     new ValidationPipe({

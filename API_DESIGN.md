@@ -103,6 +103,10 @@ All application errors use `{ statusCode, code, message, details? }`. Validation
 
 Unexpected exceptions are normalized to exactly `500 INTERNAL_ERROR` with `Internal server error`; their original message is not copied into the response. The application does not log raw Bearer tokens, request authorization headers, Prisma queries, or exception objects that could contain secrets.
 
+## Browser API Boundary
+
+The backend CORS policy allows `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, and `OPTIONS` with `Authorization`/`Content-Type` only from the configured `FRONTEND_ORIGIN` (local default `http://localhost:3000`). The local API listens on port 3001 because Auth0's fixed callback assigns port 3000 to the SPA. Untrusted origins receive no `Access-Control-Allow-Origin` header. CORS is a browser boundary in addition to—not a replacement for—Bearer authentication and owner-scoped authorization.
+
 ## Bookmarks API
 
 Bookmark responses contain `id`, `url`, `title`, `notes`, `collectionId`, `ownerId`, `createdAt`, and `updatedAt`. The internal `collectionOwnerId` defense-in-depth field is never exposed.
