@@ -33,6 +33,7 @@
 8. The first full verification failed because the project PostgreSQL container was stopped. Confirmed the empty Compose state, started only the existing `postgres` service without resetting its volume, reran the narrow database suite, and reran the full gate successfully.
 9. User manual testing passed create, filter, pagination, delete, persistence, and CORS behavior but exposed collapsed MUI TextField labels/padding in both create dialogs. Removed Tailwind preflight from the shared CSS baseline and made MUI CssBaseline authoritative while retaining Tailwind theme/utilities.
 10. A second manual screenshot showed that empty single-line outlined fields still did not enter the floating-label/notched state, while multiline and select fields rendered correctly. Made the `Name`, `URL`, and `Title` label/notch behavior explicit and added DOM regression coverage for the empty state.
+11. User confirmed the UI fix and identified the remaining `CollectionFormDialog.tsx` formatting as intentional Prettier output. Added a frontend Prettier contract, scripts, verification gate, and project guidance, then mechanically formatted all existing `.tsx` files in a separate commit scope.
 
 ## 3. Code/Logic Created or Modified
 

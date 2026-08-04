@@ -31,14 +31,15 @@ This assignment evaluates how well AI-generated work is specified, reviewed, ver
 2. Enable and respect strict TypeScript settings. Do not use `any` to bypass type errors; prefer `unknown`, narrowing, generics, or explicit domain types.
 3. Name React components with PascalCase.
 4. Name functions and methods with camelCase.
-5. Follow existing file and folder naming conventions once established.
-6. Keep functions focused and make side effects explicit.
-7. Avoid large components containing data fetching, transformation, business rules, and presentation together. Extract logic into hooks, services, utilities, or smaller components.
-8. Keep controllers thin. Put business logic in services and persistence concerns behind focused data-access methods.
-9. Prefer explicit domain and API types over untyped objects.
-10. Do not duplicate validation, ownership, or error-handling logic across endpoints when a small, clear shared abstraction is appropriate.
-11. Avoid premature abstraction and unnecessary dependencies.
-12. Write comments for intent, security constraints, and non-obvious trade-offs, not for code that is already self-explanatory.
+5. Format every frontend `.tsx` file with the frontend Prettier configuration. Run `npm run format:check --workspace=frontend` before handoff and do not mix mechanical formatting with behavior changes when a separate commit is practical.
+6. Follow existing file and folder naming conventions once established.
+7. Keep functions focused and make side effects explicit.
+8. Avoid large components containing data fetching, transformation, business rules, and presentation together. Extract logic into hooks, services, utilities, or smaller components.
+9. Keep controllers thin. Put business logic in services and persistence concerns behind focused data-access methods.
+10. Prefer explicit domain and API types over untyped objects.
+11. Do not duplicate validation, ownership, or error-handling logic across endpoints when a small, clear shared abstraction is appropriate.
+12. Avoid premature abstraction and unnecessary dependencies.
+13. Write comments for intent, security constraints, and non-obvious trade-offs, not for code that is already self-explanatory.
 
 ## Security and Privacy Invariant
 
@@ -125,16 +126,17 @@ Every new or modified endpoint must run the `security-review` and `verify-privac
 
 Run the narrowest relevant checks while iterating. Before presenting a session or final result as complete, run the repository's actual scripts for:
 
-1. Lint.
-2. TypeScript typecheck with zero errors.
-3. Relevant tests, followed by the full test suite when appropriate.
-4. Backend and frontend production builds.
-5. Prisma schema/migration and seed verification when database code changed.
-6. `security-review` for auth, API, or data-access changes.
-7. `verify-privacy` for every endpoint change.
-8. Git status and diff review.
-9. Secret and confidential-file review.
-10. Documentation-to-code consistency.
+1. Frontend Prettier format check.
+2. Lint.
+3. TypeScript typecheck with zero errors.
+4. Relevant tests, followed by the full test suite when appropriate.
+5. Backend and frontend production builds.
+6. Prisma schema/migration and seed verification when database code changed.
+7. `security-review` for auth, API, or data-access changes.
+8. `verify-privacy` for every endpoint change.
+9. Git status and diff review.
+10. Secret and confidential-file review.
+11. Documentation-to-code consistency.
 
 Report the exact commands run and their outcomes. State skipped checks and unresolved risks explicitly.
 

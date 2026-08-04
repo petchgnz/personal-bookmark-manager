@@ -84,3 +84,5 @@ npm run verify
 ```
 
 The command runs lint, TypeScript checks, unit tests, PostgreSQL-backed database and authentication integration tests, and production builds. Database tests use isolated records and clean up their own data; they do not delete seed data.
+
+Frontend `.tsx` files use the committed Prettier configuration. Run `npm run format --workspace=frontend` to apply it; `npm run verify` includes a non-mutating format check.
