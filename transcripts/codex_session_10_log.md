@@ -30,6 +30,7 @@
 6. Validated CI YAML formatting, Prisma schema validity, local migration status, ignored confidential paths, and tracked secret patterns.
 7. Added a verification report and aligned README, decisions, AI workflow evidence, and this transcript.
 8. Ran the deterministic seed twice successfully. The first full gate then exposed CRLF/LF drift after Windows checkout; added `.gitattributes`, normalized TSX files, and reran the complete gate successfully.
+9. Reviewed the first GitHub-hosted failure supplied by the user. The clean runner reached the seed before any Prisma Client generation, so the ignored generated module could not be resolved. Added an explicit Prisma generation step before migration and seed, then repeated local verification.
 
 ## 3. Code/Logic Created or Modified
 
@@ -46,6 +47,7 @@
 - The first migration-status command referenced a nonexistent npm script. Running `npx prisma migrate status` from the backend workspace provided the intended read-only status and confirmed the database was current.
 - Secret-pattern search returns exit code 1 when no match exists; ignored-path checks separately confirmed confidential/local files are excluded.
 - The first full verification after merging Session 9 failed at `format:check`: Windows checkout converted all TSX files to CRLF while Prettier expected LF. Added a committed `.gitattributes` rule and explicit Prettier LF policy so Windows and Linux CI use the same bytes instead of weakening the check.
+- The first hosted CI run failed at `Seed deterministic fixtures` with `Cannot find module '../src/generated/prisma/client'`. Local runs had already generated that ignored directory, masking the clean-checkout dependency. Added `npm run prisma:generate --workspace=backend` immediately after dependency installation so seed startup no longer depends on prior local state.
 
 ## 5. Security and Privacy Review
 
@@ -59,12 +61,12 @@
 - Prisma schema validation passed and local migration status reported the database up to date with the one committed migration.
 - The deterministic seed succeeded twice in succession.
 - `npm run verify` passed: frontend 26 tests, backend unit 16 tests, PostgreSQL integration 3 tests, backend e2e 46 tests, format check, lint, strict TypeScript checks, and both production builds.
-- GitHub-hosted CI remains pending until the branch is pushed/merged and the workflow actually runs.
+- The initial GitHub-hosted run failed and produced actionable clean-runner evidence. The corrected hosted run remains pending until this fix branch is pushed/merged and the workflow runs again.
 - Final Git diff and commit results are reported in the handoff.
 
 # Your Tasks
 
-- Push or merge the branch and confirm the first GitHub-hosted CI run before treating hosted CI as passing evidence.
+- Push or merge the CI fix branch and confirm the corrected GitHub-hosted run before treating hosted CI as passing evidence.
 
 # Tests
 
@@ -73,3 +75,5 @@
 - `npx prisma migrate status` reported the local database current.
 - `npm run prisma:seed --workspace=backend` passed twice.
 - `npm run verify` passed with the counts recorded above.
+- After the hosted failure fix, `npm run prisma:generate --workspace=backend` and `npm run prisma:seed --workspace=backend` passed in sequence.
+- The post-fix `npm run verify` passed again: frontend 26 tests, backend unit 16 tests, PostgreSQL integration 3 tests, backend e2e 46 tests, lint, strict TypeScript checks, and both production builds.
