@@ -42,6 +42,31 @@ GET    /collections/:id/bookmarks
 
 Implementation details, validation limits, query parameters, error codes, and privacy behavior must be added as the backend is implemented.
 
+## Authentication Boundary
+
+- Every controller is protected by a global guard; a route may become public only through an explicit future exemption.
+- The `Authorization` header must contain exactly `Bearer <access-token>` (scheme matching is case-insensitive).
+- The token must have a trusted RS256 signature and satisfy the configured issuer, API audience, expiry/not-before, and non-empty subject requirements.
+- ID tokens are rejected because their frontend client audience does not equal the API audience.
+- Authentication failures return a generic `401` and do not expose JOSE parsing or signature details.
+- The verified `(issuer, subject)` is resolved to a persisted internal user before controller execution. Raw tokens and external identifiers are not returned.
+
+## `GET /me`
+
+Returns the current persisted user directly:
+
+```json
+{
+  "id": "0d17453d-cb82-42b7-95fb-a17fe12b47fd",
+  "email": null,
+  "displayName": null,
+  "createdAt": "2026-08-04T00:00:00.000Z",
+  "updatedAt": "2026-08-04T00:00:00.000Z"
+}
+```
+
+The endpoint atomically creates the mapping on first use and reuses it thereafter. It does not expose `externalIssuer` or `externalSubject`.
+
 ## Persisted Identity and Ownership
 
 - `User.id` is the internal UUID used as `ownerId` for collections and bookmarks.

@@ -51,3 +51,19 @@ Decision: use the Prisma 7 `prisma-client` generator with an explicit ignored ou
 Reason: Prisma 7 requires an explicit generated-client output and a driver adapter. The generated NodeNext TypeScript imports do not execute correctly through CommonJS `ts-node`; `tsx` resolves them correctly. Prisma's query compiler uses dynamic imports under Jest and requires VM modules for this integration suite.
 
 Trade-off: database tests currently emit Node's experimental VM Modules warning. Application runtime does not require that flag.
+
+## 2026-08-04 - API Access Tokens and RS256 Verification
+
+Decision: accept only OIDC access tokens whose audience contains the configured API identifier. Verify them against the trusted issuer JWKS with an explicit RS256 allowlist, exact issuer and audience checks, temporal claim validation, and a required subject. Reject ID tokens whose audience is the frontend client.
+
+Reason: an ID token proves authentication to the frontend and is not an API authorization credential. Explicit algorithm and claim checks avoid trusting unverified payload data or an unexpected signing mode. Live discovery confirmed the configured Auth0 tenant exposes the expected issuer, discovery endpoints, and RSA signing keys.
+
+Impact: `OIDC_ISSUER`, `OIDC_AUDIENCE`, and `OIDC_JWKS_URI` are public configuration values with documented development defaults; they are not secrets. Verification failures intentionally collapse to a generic `401`. Raw tokens are never logged or persisted.
+
+## 2026-08-04 - Global Authentication and Atomic Provisioning
+
+Decision: install authentication as a Nest global guard. After token verification, atomically upsert a user by unique `(externalIssuer, externalSubject)` and attach a safe internal-user projection to the request. `GET /me` returns that projection.
+
+Reason: global protection makes authenticated access the default for current and future controllers. Atomic upsert makes concurrent first requests idempotent, while `User.id` remains the stable domain owner identifier.
+
+Trade-off: every authenticated request currently performs a database upsert. Caching can be evaluated only if profiling justifies it; correctness and immediate provisioning take priority. Email and display name remain null until a verified profile-data policy is implemented.

@@ -1,0 +1,2 @@
+export const localDatabaseUrl =
+  'postgresql://bookmark_app:bookmark_app_password@localhost:5433/personal_bookmark_manager';
