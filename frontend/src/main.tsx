@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Auth0Provider, type AppState } from '@auth0/auth0-react'
 import GlobalStyles from '@mui/material/GlobalStyles'
+import CssBaseline from '@mui/material/CssBaseline'
 import { StyledEngineProvider, ThemeProvider } from '@mui/material/styles'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter } from 'react-router'
@@ -28,8 +29,9 @@ try {
   root.render(
     <StrictMode>
       <StyledEngineProvider enableCssLayer>
-        <GlobalStyles styles="@layer theme, base, mui, components, utilities;" />
+        <GlobalStyles styles="@layer theme, mui, components, utilities;" />
         <ThemeProvider theme={theme}>
+          <CssBaseline />
           <Auth0Provider
             domain={config.auth0Domain}
             clientId={config.auth0ClientId}

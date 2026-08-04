@@ -31,6 +31,7 @@
 6. Reviewed cache invalidation, safe links, authenticated API reuse, and the unchanged backend privacy boundary.
 7. Updated README, AI workflow evidence, and this transcript before the full repository verification.
 8. The first full verification failed because the project PostgreSQL container was stopped. Confirmed the empty Compose state, started only the existing `postgres` service without resetting its volume, reran the narrow database suite, and reran the full gate successfully.
+9. User manual testing passed create, filter, pagination, delete, persistence, and CORS behavior but exposed collapsed MUI TextField labels/padding in both create dialogs. Removed Tailwind preflight from the shared CSS baseline and made MUI CssBaseline authoritative while retaining Tailwind theme/utilities.
 
 ## 3. Code/Logic Created or Modified
 
@@ -49,6 +50,7 @@
 - Review found bookmark creation/deletion initially invalidated only `/bookmarks` query keys. Collection-prefixed nested bookmark queries were also invalidated before handoff.
 - The first production build after adding screens produced a larger single chunk. Route-level lazy loading split the pages and removed the chunk-size warning.
 - The first `npm run verify` reached `test:db` and failed during Prisma cleanup because `docker compose ps` showed no running project service. Starting the existing PostgreSQL service restored the test environment; the narrow database suite and complete verification then passed without code or schema changes.
+- Manual screenshots showed Tailwind's native form reset interfering with MUI outlined fields even though the documented layer order was present. The fix removed the competing preflight rather than adding per-dialog spacing overrides, keeping MUI responsible for component normalization and Tailwind responsible for utilities.
 
 ## 5. Security and Privacy Review
 
