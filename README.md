@@ -13,7 +13,7 @@ transcripts/   Session logs and verification evidence
 
 ## Status
 
-The npm-workspaces monorepo and generated NestJS/React application baselines are scaffolded. The Prisma/PostgreSQL data model, initial migration, deterministic two-user seed, and database invariant tests are implemented. Auth0 integration, API resources, request-level privacy controls, and product UI are not implemented yet.
+The npm-workspaces monorepo and NestJS/React application baselines are scaffolded. The Prisma/PostgreSQL data model, initial migration, deterministic seed, database invariant tests, Auth0 access-token boundary, atomic user provisioning, and authenticated `GET /me` endpoint are implemented. Collection and bookmark resources, request-level ownership controls, and product UI are not implemented yet.
 
 ## Confidentiality
 
@@ -44,6 +44,12 @@ npm run prisma:seed --workspace=backend
 
 The default local connection is documented in `backend/.env.example`. Override `DATABASE_URL` for non-local environments.
 
+## Backend Authentication
+
+The API accepts only Bearer access tokens issued for the configured API audience. It validates the signature through the issuer JWKS plus exact issuer, audience, expiry/not-before, RS256 algorithm, and subject claims. An ID token whose audience is the frontend client is rejected. Configure the public OIDC values in `backend/.env` from `backend/.env.example`; do not store tokens or client secrets there.
+
+On the first valid request, the API atomically creates a user mapped by `(issuer, subject)`. `GET /me` returns only the internal user profile and never returns the external identity pair.
+
 ## Verification
 
 With the PostgreSQL container running and migrated:
@@ -52,4 +58,4 @@ With the PostgreSQL container running and migrated:
 npm run verify
 ```
 
-The command runs lint, TypeScript checks, baseline tests, PostgreSQL-backed database invariant tests, and production builds. Database tests use dedicated deterministic IDs and clean up their own records; they do not delete seed data.
+The command runs lint, TypeScript checks, unit tests, PostgreSQL-backed database and authentication integration tests, and production builds. Database tests use isolated records and clean up their own data; they do not delete seed data.
