@@ -82,7 +82,7 @@ Collection responses contain `id`, `name`, `ownerId`, `createdAt`, and `updatedA
 
 List query parameters:
 
-- `page`: positive integer, default `1`.
+- `page`: integer from `1` through `1,000,000`, default `1`.
 - `limit`: integer from `1` through `100`, default `20`.
 - Unknown, zero, negative, non-integer, or excessive query values return `400` rather than being silently adjusted.
 - Results are ordered by `createdAt DESC, id DESC`. Both rows and totals are scoped to the authenticated internal `ownerId`.
@@ -100,6 +100,8 @@ All read and mutation predicates contain `ownerId`. Missing and cross-owner iden
 ## Error Contract
 
 All application errors use `{ statusCode, code, message, details? }`. Validation failures use `VALIDATION_ERROR`; missing credentials use `UNAUTHENTICATED`; rejected credentials use `INVALID_TOKEN`; hidden missing/cross-owner resources use `RESOURCE_NOT_FOUND`; unexpected failures use `INTERNAL_ERROR`. Validation `details` contains only field-level safe messages. Stack traces, Prisma/SQL details, paths, and token content are not returned.
+
+Unexpected exceptions are normalized to exactly `500 INTERNAL_ERROR` with `Internal server error`; their original message is not copied into the response. The application does not log raw Bearer tokens, request authorization headers, Prisma queries, or exception objects that could contain secrets.
 
 ## Bookmarks API
 

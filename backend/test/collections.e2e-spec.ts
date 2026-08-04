@@ -148,6 +148,7 @@ describe('collections (e2e)', () => {
     '/collections?page=0',
     '/collections?limit=101',
     '/collections?page=one',
+    '/collections?page=1000001',
     '/collections?unexpected=true',
   ])('rejects invalid pagination query %s', async (path) => {
     await request(app.getHttpServer())

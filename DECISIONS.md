@@ -87,3 +87,13 @@ Decision: URLs must be trimmed absolute HTTP/HTTPS URLs up to 2,048 characters; 
 Decision: any non-null `collectionId` is checked with `(id, ownerId)` inside the same transaction as bookmark creation/update. Bookmark mutations and read-backs also include the authenticated `ownerId`; nested routes authorize the collection and scope rows/totals by both owner and collection.
 
 Reason: these predicates prevent mass assignment and cross-owner relation creation while ensuring filters, totals, and nested endpoints do not reveal another user's private data. Missing and foreign relations deliberately share the same safe response.
+
+## 2026-08-04 - API Hardening Limits and Regression Boundary
+
+Decision: reject an empty OIDC `sub` even when it is technically a string. Cap pagination `page` at 1,000,000 in addition to the existing `limit` cap of 100.
+
+Reason: the internal identity mapping requires a meaningful non-empty subject. An unbounded page can produce unsafe or database-invalid offsets even though it passes integer validation; a high explicit cap preserves predictable offset behavior without silently changing the request.
+
+Decision: maintain an adversarial regression suite that enumerates every controller route without credentials, checks that invalid token values are not echoed, verifies unexpected errors are normalized, compares foreign and missing filter behavior, and exercises a concurrent Bookmark-create/Collection-delete race.
+
+Impact: no route was made public, no schema or dependency changed, and no sensitive logging was added. The concurrency result is deliberately either successful creation followed by `SET NULL`, or a safe Collection `404`; a `500` or orphan relation is invalid.

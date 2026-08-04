@@ -19,6 +19,7 @@ const defaultCodes: Record<number, string> = {
   [HttpStatus.UNAUTHORIZED]: 'UNAUTHENTICATED',
   [HttpStatus.NOT_FOUND]: 'RESOURCE_NOT_FOUND',
   [HttpStatus.CONFLICT]: 'RESOURCE_CONFLICT',
+  [HttpStatus.INTERNAL_SERVER_ERROR]: 'INTERNAL_ERROR',
 };
 
 @Catch()

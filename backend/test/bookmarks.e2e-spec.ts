@@ -183,6 +183,7 @@ describe('bookmarks (e2e)', () => {
 
   it('isolates bookmark lists, filters, and totals by owner', async () => {
     const collection = await createCollection('bookmark-token-a', 'A');
+    const privateCollection = await createCollection('bookmark-token-b', 'B');
     await createBookmark('bookmark-token-a', { title: 'A uncategorised' });
     await createBookmark('bookmark-token-a', {
       title: 'A categorised',
@@ -213,6 +214,20 @@ describe('bookmarks (e2e)', () => {
     expect(
       (uncategorised.body as { data: BookmarkBody[] }).data[0]?.title,
     ).toBe('A uncategorised');
+
+    const foreignFilter = await request(app.getHttpServer())
+      .get(`/bookmarks?collectionId=${privateCollection.id}`)
+      .set('Authorization', auth('bookmark-token-a'))
+      .expect(200);
+    const missingFilter = await request(app.getHttpServer())
+      .get('/bookmarks?collectionId=00000000-0000-4000-8000-000000000009')
+      .set('Authorization', auth('bookmark-token-a'))
+      .expect(200);
+    expect(foreignFilter.body).toEqual(missingFilter.body);
+    expect(foreignFilter.body).toMatchObject({
+      data: [],
+      meta: { total: 0 },
+    });
   });
 
   it('rejects conflicting, false, and unknown filters', async () => {
@@ -354,5 +369,36 @@ describe('bookmarks (e2e)', () => {
     await expect(
       prisma.bookmark.findUnique({ where: { id: bookmark.id } }),
     ).resolves.toBeNull();
+  });
+
+  it('handles concurrent bookmark creation and collection deletion without a 500 or orphan relation', async () => {
+    const collection = await createCollection('bookmark-token-a', 'Race');
+    const [creation, deletion] = await Promise.all([
+      request(app.getHttpServer())
+        .post('/bookmarks')
+        .set('Authorization', auth('bookmark-token-a'))
+        .send({
+          url: 'https://concurrency.test',
+          title: 'Concurrent write',
+          collectionId: collection.id,
+        }),
+      request(app.getHttpServer())
+        .delete(`/collections/${collection.id}`)
+        .set('Authorization', auth('bookmark-token-a')),
+    ]);
+
+    expect([201, 404]).toContain(creation.status);
+    expect(deletion.status).toBe(204);
+    expect(creation.status).not.toBe(500);
+
+    const remaining = await prisma.bookmark.findMany({
+      where: { url: 'https://concurrency.test' },
+      select: { collectionId: true, collectionOwnerId: true },
+    });
+    expect(remaining).toEqual(
+      creation.status === 201
+        ? [{ collectionId: null, collectionOwnerId: null }]
+        : [],
+    );
   });
 });

@@ -13,7 +13,7 @@ transcripts/   Session logs and verification evidence
 
 ## Status
 
-The npm-workspaces monorepo and NestJS/React application baselines are scaffolded. The Prisma/PostgreSQL model, authentication boundary, atomic user provisioning, `GET /me`, and complete owner-scoped Collection and Bookmark APIs are implemented. Product UI, real browser authentication, CI, and optional bonuses are not implemented yet.
+The npm-workspaces monorepo and NestJS/React application baselines are scaffolded. The Prisma/PostgreSQL model, authentication boundary, atomic user provisioning, `GET /me`, and complete owner-scoped Collection and Bookmark APIs are implemented and adversarially reviewed. Product UI, real browser authentication, CI, and optional bonuses are not implemented yet.
 
 ## Confidentiality
 

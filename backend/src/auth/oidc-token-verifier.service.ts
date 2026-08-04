@@ -35,7 +35,11 @@ export class OidcTokenVerifier {
         },
       );
 
-      if (typeof payload.iss !== 'string' || typeof payload.sub !== 'string') {
+      if (
+        typeof payload.iss !== 'string' ||
+        typeof payload.sub !== 'string' ||
+        payload.sub.length === 0
+      ) {
         throw new UnauthorizedException('Invalid access token');
       }
 
