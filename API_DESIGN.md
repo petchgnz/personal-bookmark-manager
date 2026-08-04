@@ -101,6 +101,37 @@ All read and mutation predicates contain `ownerId`. Missing and cross-owner iden
 
 All application errors use `{ statusCode, code, message, details? }`. Validation failures use `VALIDATION_ERROR`; missing credentials use `UNAUTHENTICATED`; rejected credentials use `INVALID_TOKEN`; hidden missing/cross-owner resources use `RESOURCE_NOT_FOUND`; unexpected failures use `INTERNAL_ERROR`. Validation `details` contains only field-level safe messages. Stack traces, Prisma/SQL details, paths, and token content are not returned.
 
+## Bookmarks API
+
+Bookmark responses contain `id`, `url`, `title`, `notes`, `collectionId`, `ownerId`, `createdAt`, and `updatedAt`. The internal `collectionOwnerId` defense-in-depth field is never exposed.
+
+| Method | Path | Behavior |
+|---|---|---|
+| `POST` | `/bookmarks` | Create an owned bookmark; `notes` and `collectionId` default to `null`. |
+| `GET` | `/bookmarks` | Return an owner-scoped paginated/filterable list. |
+| `GET` | `/bookmarks/:id` | Return one owned bookmark. |
+| `PUT` | `/bookmarks/:id` | Fully replace editable fields; all four fields are required, using explicit `null` for cleared nullable fields. |
+| `PATCH` | `/bookmarks/:id` | Update explicitly provided fields; `notes` and `collectionId` accept `null`; `url` and `title` do not. |
+| `DELETE` | `/bookmarks/:id` | Delete an owned bookmark and return `204`. |
+| `GET` | `/collections/:id/bookmarks` | Authorize the collection, then return only its owner-scoped bookmarks. |
+
+Validation:
+
+- `url`: trimmed, non-empty, absolute `http` or `https`, maximum 2,048 characters. Unsafe/non-web schemes are rejected.
+- `title`: trimmed, non-empty, maximum 300 characters.
+- `notes`: nullable trimmed string, maximum 10,000 characters.
+- `collectionId`: nullable UUID. Any non-null relation must identify a collection owned by the authenticated user; another user's and missing collection both return the same Collection `404`.
+- Unknown or system-managed fields are rejected. Duplicate URLs are permitted.
+
+List filters extend the same `page`/`limit` contract used by Collections:
+
+- `collectionId=<uuid>` returns bookmarks in that collection without exposing whether a foreign collection exists.
+- `uncategorised=true` explicitly returns bookmarks whose `collectionId` is `null`.
+- The two filters are mutually exclusive. `uncategorised=false`, unknown filters, and invalid values return `400`.
+- Full-text `search` is not accepted; it remains bonus scope.
+
+For the nested route, a missing or cross-owner collection returns the identical Collection `404`; an owned empty collection returns a paginated `200` with empty `data`. Both bookmark rows and totals include `ownerId` and `collectionId` predicates.
+
 ## Persisted Identity and Ownership
 
 - `User.id` is the internal UUID used as `ownerId` for collections and bookmarks.
@@ -125,10 +156,10 @@ All application errors use `{ statusCode, code, message, details? }`. Validation
 | Collection name | 120 characters |
 | Bookmark URL | 2048 characters |
 | Bookmark title | 300 characters |
-| Bookmark notes | PostgreSQL `TEXT` |
+| Bookmark notes | PostgreSQL `TEXT`; API maximum 10,000 characters |
 | External issuer | 512 characters |
 | External subject | 255 characters |
 | Email | 320 characters |
 | Display name | 200 characters |
 
-Request validation enforces the Collection limit. Bookmark request limits will be enforced when its API DTOs are implemented.
+Request validation enforces all Collection and Bookmark API limits before persistence.
