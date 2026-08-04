@@ -13,7 +13,8 @@
     "test:db": "npm run test:db --workspace=backend",
     "test:e2e": "npm run test:e2e --workspace=backend",
     "build": "npm run build --workspaces --if-present",
-    "verify": "npm run lint && npm run typecheck && npm test && npm run test:db && npm run test:e2e && npm run build"
+    "format:check": "npm run format:check --workspace=frontend",
+    "verify": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run test:db && npm run test:e2e && npm run build"
   },
   "engines": {
     "node": ">=22.22.0",
