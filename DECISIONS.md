@@ -67,3 +67,13 @@ Decision: install authentication as a Nest global guard. After token verificatio
 Reason: global protection makes authenticated access the default for current and future controllers. Atomic upsert makes concurrent first requests idempotent, while `User.id` remains the stable domain owner identifier.
 
 Trade-off: every authenticated request currently performs a database upsert. Caching can be evaluated only if profiling justifies it; correctness and immediate provisioning take priority. Email and display name remain null until a verified profile-data policy is implemented.
+
+## 2026-08-04 - Owner-Scoped Collection Mutations and Errors
+
+Decision: every Collection read, count, update, and delete includes the authenticated internal `ownerId` in its database predicate. Updates and deletes use atomic owner-scoped mutations; missing and cross-owner resources return the same `RESOURCE_NOT_FOUND` response. Paginated rows and totals are computed with the same owner predicate.
+
+Reason: controller-level checks or separate existence prechecks can disclose another user's resource or create time-of-check/time-of-use gaps. Owner predicates at the data-access boundary make privacy part of the operation itself.
+
+Decision: use a global validation pipe and exception filter to reject unknown fields and emit a safe `{ statusCode, code, message, details? }` contract. Request IDs remain deferred because adding them now would require request-context plumbing without improving the core privacy behavior.
+
+Impact: Collection PUT requires the full editable shape (`name`); PATCH changes only an explicit `name`, while omitted/empty or explicit `null` input is invalid. No database schema change was required.

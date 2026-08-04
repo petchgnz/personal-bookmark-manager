@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
 import type { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
+import { configureApp } from '../src/app.config';
 import { OidcTokenVerifier } from '../src/auth/oidc-token-verifier.service';
 import type { VerifiedIdentity } from '../src/auth/auth.types';
 import { PrismaService } from '../src/database/prisma.service';
@@ -54,6 +55,7 @@ describe('authentication and /me (e2e)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
+    configureApp(app);
     prisma = moduleFixture.get(PrismaService);
     await app.init();
   });

@@ -18,7 +18,7 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const token = this.extractBearerToken(request.headers.authorization);
-    const identity = await this.tokenVerifier.verify(token);
+    const identity = await this.verifyToken(token);
     const user = await this.userProvisioning.provision(identity);
 
     Object.assign(request, { user });
@@ -30,9 +30,23 @@ export class AuthGuard implements CanActivate {
     const match = authorization?.match(/^Bearer\s+(\S+)$/i);
 
     if (!match) {
-      throw new UnauthorizedException('Bearer token required');
+      throw new UnauthorizedException({
+        code: 'UNAUTHENTICATED',
+        message: 'Bearer token required',
+      });
     }
 
     return match[1];
+  }
+
+  private async verifyToken(token: string) {
+    try {
+      return await this.tokenVerifier.verify(token);
+    } catch {
+      throw new UnauthorizedException({
+        code: 'INVALID_TOKEN',
+        message: 'Invalid access token',
+      });
+    }
   }
 }

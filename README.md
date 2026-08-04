@@ -13,7 +13,7 @@ transcripts/   Session logs and verification evidence
 
 ## Status
 
-The npm-workspaces monorepo and NestJS/React application baselines are scaffolded. The Prisma/PostgreSQL data model, initial migration, deterministic seed, database invariant tests, Auth0 access-token boundary, atomic user provisioning, and authenticated `GET /me` endpoint are implemented. Collection and bookmark resources, request-level ownership controls, and product UI are not implemented yet.
+The npm-workspaces monorepo and NestJS/React application baselines are scaffolded. The Prisma/PostgreSQL model, authentication boundary, atomic user provisioning, authenticated `GET /me`, and complete owner-scoped Collection CRUD API are implemented. Bookmark resources, their ownership controls, and product UI are not implemented yet.
 
 ## Confidentiality
 
@@ -49,6 +49,10 @@ The default local connection is documented in `backend/.env.example`. Override `
 The API accepts only Bearer access tokens issued for the configured API audience. It validates the signature through the issuer JWKS plus exact issuer, audience, expiry/not-before, RS256 algorithm, and subject claims. An ID token whose audience is the frontend client is rejected. Configure the public OIDC values in `backend/.env` from `backend/.env.example`; do not store tokens or client secrets there.
 
 On the first valid request, the API atomically creates a user mapped by `(issuer, subject)`. `GET /me` returns only the internal user profile and never returns the external identity pair.
+
+## Collections
+
+Authenticated clients can create, list, view, replace, patch, and delete collections under `/collections`. Lists use `page`/`limit` offset pagination with defaults `1`/`20` and a maximum limit of `100`. Missing and cross-owner resources both return the same `404`; pagination rows and totals never include another user's collections. See `API_DESIGN.md` for the exact contract.
 
 ## Verification
 

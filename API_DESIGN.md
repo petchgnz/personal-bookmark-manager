@@ -67,6 +67,40 @@ Returns the current persisted user directly:
 
 The endpoint atomically creates the mapping on first use and reuses it thereafter. It does not expose `externalIssuer` or `externalSubject`.
 
+## Collections API
+
+Collection responses contain `id`, `name`, `ownerId`, `createdAt`, and `updatedAt`. Names are trimmed, must be non-empty strings, and have a maximum length of 120 characters. Duplicate names are permitted. Unknown fields and writes to system-managed fields are rejected.
+
+| Method | Path | Behavior |
+|---|---|---|
+| `POST` | `/collections` | Create an owned collection; returns `201` with the resource. |
+| `GET` | `/collections` | Return an owner-scoped paginated list. |
+| `GET` | `/collections/:id` | Return one owned collection. |
+| `PUT` | `/collections/:id` | Fully replace editable fields; `name` is required. |
+| `PATCH` | `/collections/:id` | Update an explicitly provided `name`; omitted/empty input and `null` are invalid. |
+| `DELETE` | `/collections/:id` | Delete an owned collection; returns `204`. Related bookmarks survive and become uncategorised. |
+
+List query parameters:
+
+- `page`: positive integer, default `1`.
+- `limit`: integer from `1` through `100`, default `20`.
+- Unknown, zero, negative, non-integer, or excessive query values return `400` rather than being silently adjusted.
+- Results are ordered by `createdAt DESC, id DESC`. Both rows and totals are scoped to the authenticated internal `ownerId`.
+
+All read and mutation predicates contain `ownerId`. Missing and cross-owner identifiers return the identical safe response:
+
+```json
+{
+  "statusCode": 404,
+  "code": "RESOURCE_NOT_FOUND",
+  "message": "Collection not found"
+}
+```
+
+## Error Contract
+
+All application errors use `{ statusCode, code, message, details? }`. Validation failures use `VALIDATION_ERROR`; missing credentials use `UNAUTHENTICATED`; rejected credentials use `INVALID_TOKEN`; hidden missing/cross-owner resources use `RESOURCE_NOT_FOUND`; unexpected failures use `INTERNAL_ERROR`. Validation `details` contains only field-level safe messages. Stack traces, Prisma/SQL details, paths, and token content are not returned.
+
 ## Persisted Identity and Ownership
 
 - `User.id` is the internal UUID used as `ownerId` for collections and bookmarks.
@@ -97,4 +131,4 @@ The endpoint atomically creates the mapping on first use and reuses it thereafte
 | Email | 320 characters |
 | Display name | 200 characters |
 
-Request validation will enforce these limits before persistence when the API DTOs are implemented.
+Request validation enforces the Collection limit. Bookmark request limits will be enforced when its API DTOs are implemented.
