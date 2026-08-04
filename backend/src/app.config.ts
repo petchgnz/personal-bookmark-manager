@@ -29,7 +29,7 @@ function flattenValidationErrors(
 export function configureApp(app: INestApplication): void {
   const configService = app.get(ConfigService);
   const frontendOrigin =
-    configService.get<string>('FRONTEND_ORIGIN') ?? 'http://localhost:5173';
+    configService.get<string>('FRONTEND_ORIGIN') ?? 'http://localhost:3000';
   const allowFrontendOrigin: CustomOrigin = (requestOrigin, callback) =>
     callback(
       null,

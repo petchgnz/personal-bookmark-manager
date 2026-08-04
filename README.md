@@ -59,9 +59,9 @@ Copy-Item frontend/.env.example frontend/.env
 npm run dev --workspace=frontend
 ```
 
-The Auth0 SPA application must allow `http://localhost:5173/callback` as a callback URL and `http://localhost:5173` as an allowed logout URL and web origin. The frontend uses Authorization Code Flow with PKCE through the Auth0 React SDK, requests the API audience, and keeps Access Tokens in SDK-managed memory only. Do not put a Client Secret, password, or token in any frontend environment variable.
+The company Auth0 SPA application is preconfigured for `http://localhost:3000/callback` and `http://localhost:3000` logout/web-origin URLs. Vite therefore runs the frontend on port 3000 with `strictPort`; NestJS runs the API on port 3001. The frontend uses Authorization Code Flow with PKCE through the Auth0 React SDK, requests the API audience, and keeps Access Tokens in SDK-managed memory only. Do not put a Client Secret, password, or token in any frontend environment variable.
 
-The backend accepts browser requests only from `FRONTEND_ORIGIN`, defaulting to `http://localhost:5173`. Override it for another trusted frontend deployment.
+The backend accepts browser requests only from `FRONTEND_ORIGIN`, defaulting to `http://localhost:3000`. The frontend calls the local API at `http://localhost:3001`. Override both values together for another trusted deployment.
 
 ## Collections
 

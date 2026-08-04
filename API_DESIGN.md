@@ -105,7 +105,7 @@ Unexpected exceptions are normalized to exactly `500 INTERNAL_ERROR` with `Inter
 
 ## Browser API Boundary
 
-The backend CORS policy allows `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, and `OPTIONS` with `Authorization`/`Content-Type` only from the configured `FRONTEND_ORIGIN` (local default `http://localhost:5173`). Untrusted origins receive no `Access-Control-Allow-Origin` header. CORS is a browser boundary in addition to—not a replacement for—Bearer authentication and owner-scoped authorization.
+The backend CORS policy allows `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, and `OPTIONS` with `Authorization`/`Content-Type` only from the configured `FRONTEND_ORIGIN` (local default `http://localhost:3000`). The local API listens on port 3001 because Auth0's fixed callback assigns port 3000 to the SPA. Untrusted origins receive no `Access-Control-Allow-Origin` header. CORS is a browser boundary in addition to—not a replacement for—Bearer authentication and owner-scoped authorization.
 
 ## Bookmarks API
 

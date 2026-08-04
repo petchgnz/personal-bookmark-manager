@@ -109,3 +109,9 @@ Decision: wrap the app with React Router, Auth0, a single application QueryClien
 Decision: fail closed with a visible configuration error when any required `VITE_*` public value is missing. Permit browser API requests only from `FRONTEND_ORIGIN`; untrusted origins receive no CORS grant.
 
 Trade-off: the initial production JavaScript chunk is about 621 KB before gzip (about 191 KB gzip), triggering Vite's 500 KB advisory. Route-level code splitting is deferred to Session 9 when real feature pages provide meaningful split boundaries; this is a performance warning, not a correctness failure.
+
+### Local Port Correction
+
+The company Auth0 application allows only `http://localhost:3000/callback` and `http://localhost:3000` logout. Because the React SPA handles the PKCE callback, the frontend—not the resource API—must own port 3000. Vite is fixed to port 3000 with `strictPort`, NestJS moves to port 3001, the frontend API base URL becomes port 3001, and CORS trusts only the frontend on port 3000.
+
+This supersedes the initial Session 8 assumption that Vite could remain on its default port 5173. No Auth0 Dashboard access or configuration change is required.

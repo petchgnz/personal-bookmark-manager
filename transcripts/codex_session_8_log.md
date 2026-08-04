@@ -54,6 +54,7 @@
 - The first CORS callback lacked contextual parameter types; imported Nest's public `CustomOrigin` type rather than using `any`.
 - The untrusted-origin preflight correctly returned `404` instead of the initial expected `204` because CORS declined the request; the test now asserts `404` and absence of the allow-origin header.
 - Production build passes with a 621 KB pre-gzip chunk advisory; meaningful route splitting is deferred to Session 9.
+- Post-commit manual testing exposed `Callback URL mismatch`: the company Auth0 application fixes the SPA callback/logout origin to port 3000. The initial Vite-5173 assumption was corrected on the same feature branch by assigning frontend port 3000 and backend port 3001, then aligning CORS, environment examples, tests, and documentation.
 
 ## 5. Final Output
 

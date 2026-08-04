@@ -12,9 +12,11 @@ Replace `VITE_AUTH0_CLIENT_ID` with the company-provided SPA Client ID. The doma
 
 Required Auth0 application URLs:
 
-- Callback: `http://localhost:5173/callback`
-- Logout: `http://localhost:5173`
-- Web origin: `http://localhost:5173`
+- Callback: `http://localhost:3000/callback`
+- Logout: `http://localhost:3000`
+- Web origin: `http://localhost:3000`
+
+The fixed Auth0 callback means the frontend owns port 3000. The NestJS API runs separately at `http://localhost:3001`.
 
 ## Run and verify
 

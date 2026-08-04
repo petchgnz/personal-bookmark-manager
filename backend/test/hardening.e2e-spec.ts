@@ -78,13 +78,13 @@ describe('API hardening (e2e)', () => {
   it('allows browser preflight only for the configured frontend origin', async () => {
     const allowed = await request(app.getHttpServer())
       .options('/me')
-      .set('Origin', 'http://localhost:5173')
+      .set('Origin', 'http://localhost:3000')
       .set('Access-Control-Request-Method', 'GET')
       .set('Access-Control-Request-Headers', 'authorization')
       .expect(204);
 
     expect(allowed.headers['access-control-allow-origin']).toBe(
-      'http://localhost:5173',
+      'http://localhost:3000',
     );
 
     const rejected = await request(app.getHttpServer())

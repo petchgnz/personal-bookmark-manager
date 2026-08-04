@@ -7,12 +7,12 @@ describe('getRuntimeConfig', () => {
       VITE_AUTH0_DOMAIN: ' tenant.auth0.com ',
       VITE_AUTH0_CLIENT_ID: ' client-id ',
       VITE_AUTH0_AUDIENCE: ' https://api.test ',
-      VITE_API_BASE_URL: ' http://localhost:3000/ ',
+      VITE_API_BASE_URL: ' http://localhost:3001/ ',
     })).toEqual({
       auth0Domain: 'tenant.auth0.com',
       auth0ClientId: 'client-id',
       auth0Audience: 'https://api.test',
-      apiBaseUrl: 'http://localhost:3000',
+      apiBaseUrl: 'http://localhost:3001',
     })
   })
 
