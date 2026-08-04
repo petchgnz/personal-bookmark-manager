@@ -115,3 +115,11 @@ Trade-off: the initial production JavaScript chunk is about 621 KB before gzip (
 The company Auth0 application allows only `http://localhost:3000/callback` and `http://localhost:3000` logout. Because the React SPA handles the PKCE callback, the frontend—not the resource API—must own port 3000. Vite is fixed to port 3000 with `strictPort`, NestJS moves to port 3001, the frontend API base URL becomes port 3001, and CORS trusts only the frontend on port 3000.
 
 This supersedes the initial Session 8 assumption that Vite could remain on its default port 5173. No Auth0 Dashboard access or configuration change is required.
+
+## 2026-08-05 - Deterministic CI Uses an Ephemeral PostgreSQL Service
+
+Decision: GitHub Actions uses a PostgreSQL 17 service container, installs only from the committed npm lockfile, applies the committed Prisma migration, runs the deterministic two-user seed, and then executes the same `npm run verify` gate used locally.
+
+Reason: database and privacy behavior cannot be represented honestly by SQLite or mocked persistence. A fresh service per CI job proves migration compatibility and prevents state from one run affecting another. Real Auth0 credentials are deliberately excluded; cryptographic and API authentication tests use controlled local keys, while the real tenant flow remains a documented manual smoke test.
+
+Security impact: workflow permissions are read-only, no repository secrets are required, and the database credentials exist only inside the disposable CI job. CI runs on Linux because GitHub service containers require a Linux runner.
