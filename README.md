@@ -15,9 +15,6 @@ transcripts/   Session logs and verification evidence
 
 The core assignment is implemented: npm workspaces, PostgreSQL persistence, the complete owner-scoped API, Auth0 PKCE frontend authentication, collection/bookmark create-read-update-delete screens, adversarial privacy tests, and deterministic CI verification. Every optional bonus item in the brief is also implemented: CI, application Dockerfiles, `/all`, and full-text search. Only sharing remains intentionally deferred.
 
-## Confidentiality
-
-Do not commit the confidential source assignment PDF, rendered PDF pages, local environment files, Auth0 credentials, tokens, cookies, database dumps, or temporary artifacts.
 
 ## Technology Stack
 

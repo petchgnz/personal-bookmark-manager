@@ -97,9 +97,9 @@ The first GitHub-hosted run exposed a clean-runner ordering gap: the seed import
 
 ## Session 14 Final Submission Audit
 
-- The source PDF was re-read and pages 5-8 were visually inspected. PUT and PATCH are explicit backend requirements for both resources; frontend edit screens are not listed in the required website flows.
+- The source assignment was re-read and pages 5-8 were visually inspected. PUT and PATCH are explicit backend requirements for both resources; frontend edit screens are not listed in the required website flows.
 - All required tracked artifacts exist: backend, frontend, agent rules, three reusable `.agent` workflows, API/decision/workflow documents, README, automated tests, and real session transcripts.
-- Confidential `documents/`, local `ASSIGNMENT.md`, `tmp/`, environment files, generated Prisma Client, dependencies, and build output are ignored. A tracked-file scan found no assignment PDF, rendered page, local environment file, JWT-shaped token, private-key header, or Client Secret assignment.
+- Confidential `documents/`, local `ASSIGNMENT.md`, `tmp/`, environment files, generated Prisma Client, dependencies, and build output are ignored. A tracked-file scan found no source assignment document, rendered assignment page, local environment file, JWT-shaped token, private-key header, or Client Secret assignment.
 - The first verification attempt correctly failed because Docker was open but the repository PostgreSQL service was stopped. Starting only the existing `postgres` service without deleting its volume restored the environment.
 - Prisma validation passed; both committed migrations are current; deterministic seed passed; the complete repository gate then passed with the counts recorded above.
 - The full Compose profile validated, rebuilt, and started. PostgreSQL, backend, and frontend became healthy; migration exited successfully.

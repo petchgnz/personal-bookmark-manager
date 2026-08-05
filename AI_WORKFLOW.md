@@ -16,7 +16,7 @@ Work was split into ten core sessions and three gated bonus sessions. Requiremen
 
 ## Where AI Failed and How It Was Corrected
 
-1. **Framework-default assumptions:** the first frontend foundation retained Vite's port 5173 even though the provided Auth0 application allowed only `http://localhost:3000/callback`. Real login produced a callback mismatch. The PDF was reread, the SPA was moved to 3000 with `strictPort`, the API moved to 3001, and CORS/runtime examples were updated together.
+1. **Framework-default assumptions:** the first frontend foundation retained Vite's port 5173 even though the provided Auth0 application allowed only `http://localhost:3000/callback`. Real login produced a callback mismatch. The assignment was reread, the SPA was moved to 3000 with `strictPort`, the API moved to 3001, and CORS/runtime examples were updated together.
 2. **Plausible validation that was semantically wrong:** the first Collection PATCH DTO used `@IsOptional()`, which treats explicit `null` as absent. A PostgreSQL-backed test exposed the mismatch. Conditional validation now skips only `undefined`; nullable Bookmark fields accept `null` deliberately, while required fields reject it.
 3. **Clean-runner ordering gap:** local generated Prisma output hid a CI dependency. The first hosted seed failed with `MODULE_NOT_FOUND`. The supplied Actions log led to an explicit generation step before migration and seed. Generated files remain ignored, so CI continues to prove reproducibility from a clean checkout.
 
@@ -24,7 +24,7 @@ Additional corrections are kept in the transcripts: wrong Prisma error-code expe
 
 ## Prompt Evidence
 
-**A prompt that worked:** the user reported the Auth0 callback error with the PDF screenshot, the browser error, the observed ports, and then explicitly said to fix it on the current branch. That prompt supplied evidence, acceptance criteria, and change scope. The result was easy to verify: login returned to `/collections`, `/me` reached port 3001, logout returned to login, and the callback mismatch disappeared.
+**A prompt that worked:** the user reported the Auth0 callback error with an assignment screenshot, the browser error, the observed ports, and then explicitly said to fix it on the current branch. That prompt supplied evidence, acceptance criteria, and change scope. The result was easy to verify: login returned to `/collections`, `/me` reached port 3001, logout returned to login, and the callback mismatch disappeared.
 
 **A prompt/specification that did not work:** the earlier instruction to continue with the frontend-foundation session did not restate the fixed Auth0 callback constraint. The agent followed Vite's default port and produced a locally plausible but tenant-incompatible result. The recovery changed the workflow: relevant source requirements and environment constraints are now reread before implementation, and manual authentication evidence is treated separately from mocked deterministic tests.
 

@@ -3,16 +3,16 @@
 - Date: 2026-08-05
 - Session: 14 - Final submission audit
 - Agent/model: Rex (Codex, GPT-5)
-- Tools: PowerShell, Git, npm workspaces, Docker Compose, PostgreSQL, Prisma, Poppler, pypdf, Jest, Vitest
+- Tools: PowerShell, Git, npm workspaces, Docker Compose, PostgreSQL, Prisma, Poppler, document extraction tooling, Jest, Vitest
 - Starting commit: `30c0951`
 - Ending commit: reported in the Git handoff after this log is staged
 - Working branch: `codex/chore/final-submission-audit`
-- Redactions: confidential PDF contents beyond requirement summaries, credentials, environment values, raw tokens, cookies, screenshots, and hidden reasoning are excluded
+- Redactions: confidential assignment contents beyond requirement summaries, credentials, environment values, raw tokens, cookies, screenshots, and hidden reasoning are excluded
 
 ## 1. Goal/Task
 
 - Perform a final submission-readiness audit after all planned core and bonus sessions were merged into `dev`.
-- Re-read the assignment PDF and decide whether PUT/PATCH must also be implemented in the frontend.
+- Re-read the assignment and decide whether PUT/PATCH must also be implemented in the frontend.
 - Verify submission artifacts, documentation consistency, security/privacy evidence, confidential-file hygiene, repository gates, and the production-style Compose stack.
 
 ## 2. Prompts and Commands
@@ -20,12 +20,12 @@
 ### User prompts
 
 1. Asked whether any sessions remained after Session 13.
-2. Approved a Session 14 final audit and asked for a fresh comparison with the assignment PDF to determine whether PUT/PATCH was required.
+2. Approved a Session 14 final audit and asked for a fresh comparison with the assignment to determine whether PUT/PATCH was required.
 
 ### Material actions and commands
 
 1. Confirmed the Session 13 branch was merged and `dev` matched `origin/dev` at `30c0951`; created `codex/chore/final-submission-audit`.
-2. Read the complete eight-page assignment with pypdf and visually inspected rendered pages 5-8 with Poppler.
+2. Read the complete eight-page assignment with document extraction tooling and visually inspected rendered pages 5-8 with Poppler.
 3. Compared backend verbs, required frontend flows, submission artifacts, and rubric language with the implemented scope.
 4. Inventoried tracked files, reusable agent workflows, commit history, ignore rules, environment examples, CI, and documentation.
 5. Corrected stale/duplicated documentation and made the required agent corrections, steering evidence, prompt evidence, and cost-awareness sections explicit.
@@ -46,7 +46,7 @@
 
 ## 4. Errors and Debugging Steps
 
-- Bundled Poppler wrappers were not available through the default PATH, and the first pypdf extraction used a Windows encoding that could not print one Unicode symbol. The bundled executable was invoked directly and Python stdout was configured for UTF-8; all relevant pages were then rendered and inspected.
+- Bundled Poppler wrappers were not available through the default PATH, and the first document extraction attempt used a Windows encoding that could not print one Unicode symbol. The bundled executable was invoked directly and Python stdout was configured for UTF-8; all relevant pages were then rendered and inspected.
 - The first repository verification attempt found Docker running but no repository Compose services. Migration, seed, and database tests failed with connection errors while formatting, lint, typecheck, unit, and frontend tests had passed. `docker compose up -d postgres` restored the existing database without deleting its volume; migration, seed, and full verification then passed.
 - The first runtime-placeholder check matched `window.__APP_CONFIG__` and incorrectly reported unresolved content. Inspecting the template showed that real placeholders use `${VITE_...}`. The corrected check confirmed all runtime values were substituted without printing them.
 
@@ -74,7 +74,7 @@
 
 # Tests
 
-- PDF text extraction and visual inspection: pages 5-8 verified.
+- Assignment text extraction and visual inspection: pages 5-8 verified.
 - `npm run prisma:validate --workspace=backend`: passed.
 - `npm run prisma:migrate:deploy --workspace=backend`: two migrations, none pending.
 - `npm exec --workspace=backend prisma migrate status`: schema current.

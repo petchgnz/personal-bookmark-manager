@@ -3,11 +3,11 @@
 - Date: 2026-08-04
 - Session: 8
 - Agent/model: Rex (Codex, GPT-5)
-- Tools: PowerShell, Git, npm workspaces, official web documentation, PDF workflow instructions, React, Vite, Auth0 React SDK, React Router, MUI, Tailwind CSS, TanStack Query, Vitest, Testing Library, NestJS/Supertest
+- Tools: PowerShell, Git, npm workspaces, official web documentation, document review workflow, React, Vite, Auth0 React SDK, React Router, MUI, Tailwind CSS, TanStack Query, Vitest, Testing Library, NestJS/Supertest
 - Starting commit: `bd5c874`
 - Ending commit: reported in the Git handoff after this log is staged
 - Working branch: `codex/feat/frontend-foundation`
-- Redactions: company Client ID/test-user credentials, passwords, raw tokens, confidential PDF content, and hidden reasoning are excluded
+- Redactions: company Client ID/test-user credentials, passwords, raw tokens, confidential assignment content, and hidden reasoning are excluded
 
 ## 1. Goal/Task
 
@@ -65,7 +65,7 @@
 # Your Tasks
 
 - Copy `frontend/.env.example` to the ignored `frontend/.env` file.
-- Replace `VITE_AUTH0_CLIENT_ID` with the SPA Client ID provided in the company PDF; do not add a Client Secret or password.
+- Replace `VITE_AUTH0_CLIENT_ID` with the SPA Client ID provided in the company assignment; do not add a Client Secret or password.
 - If company Auth0 has not already allowed the documented callback/logout/web-origin URLs, only the company tenant administrator can correct that configuration.
 
 # Tests

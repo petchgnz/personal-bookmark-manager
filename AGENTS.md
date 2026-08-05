@@ -105,7 +105,7 @@ Every new or modified endpoint must run the `security-review` and `verify-privac
 5. Do not modify lockfiles, generated files, environment files, or CI configuration unless the task requires it; explain material changes.
 6. Do not add dependencies unless necessary. State why each non-obvious dependency is needed.
 7. Do not expose or print secrets.
-8. Do not commit the confidential assignment PDF, rendered PDF pages, local environment files, tokens, credentials, database dumps, or temporary artifacts.
+8. Do not commit the confidential source assignment, rendered assignment pages, local environment files, tokens, credentials, database dumps, or temporary artifacts.
 9. Do not weaken tests, validation, authentication, authorization, TypeScript strictness, lint rules, or CI gates merely to make a check pass.
 10. Do not begin bonus work until the core quality gate in `ASSIGNMENT.md` passes.
 
