@@ -4,6 +4,8 @@ import {
   useCollections,
   useCreateBookmark,
   useCreateCollection,
+  useReplaceBookmark,
+  useUpdateCollection,
 } from '../api/resourceQueries';
 import { BookmarkFormDialog } from './BookmarkFormDialog';
 import { CollectionFormDialog } from './CollectionFormDialog';
@@ -12,6 +14,8 @@ vi.mock('../api/resourceQueries', () => ({
   useCollections: vi.fn(),
   useCreateBookmark: vi.fn(),
   useCreateCollection: vi.fn(),
+  useReplaceBookmark: vi.fn(),
+  useUpdateCollection: vi.fn(),
 }));
 
 const mutation = {
@@ -32,6 +36,8 @@ describe('form dialog labels', () => {
     } as never);
     vi.mocked(useCreateBookmark).mockReturnValue(mutation as never);
     vi.mocked(useCreateCollection).mockReturnValue(mutation as never);
+    vi.mocked(useReplaceBookmark).mockReturnValue(mutation as never);
+    vi.mocked(useUpdateCollection).mockReturnValue(mutation as never);
   });
 
   it('keeps the empty collection name label floating above the outline', () => {

@@ -6,6 +6,7 @@ import {
   useCollections,
   useCreateCollection,
   useDeleteCollection,
+  useUpdateCollection,
 } from '../api/resourceQueries';
 import { CollectionsPage } from './CollectionsPage';
 
@@ -13,6 +14,7 @@ vi.mock('../api/resourceQueries', () => ({
   useCollections: vi.fn(),
   useCreateCollection: vi.fn(),
   useDeleteCollection: vi.fn(),
+  useUpdateCollection: vi.fn(),
 }));
 
 const collection = {
@@ -50,6 +52,7 @@ describe('CollectionsPage', () => {
     } as never);
     vi.mocked(useDeleteCollection).mockReturnValue(deleteMutation as never);
     vi.mocked(useCreateCollection).mockReturnValue(createMutation as never);
+    vi.mocked(useUpdateCollection).mockReturnValue(createMutation as never);
   });
 
   it('renders collections and waits for confirmation before deletion', async () => {

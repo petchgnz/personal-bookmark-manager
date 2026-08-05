@@ -7,6 +7,7 @@ import {
   useCollections,
   useCreateBookmark,
   useDeleteBookmark,
+  useReplaceBookmark,
 } from '../api/resourceQueries';
 import { BookmarksPage } from './BookmarksPage';
 
@@ -15,6 +16,7 @@ vi.mock('../api/resourceQueries', () => ({
   useCollections: vi.fn(),
   useCreateBookmark: vi.fn(),
   useDeleteBookmark: vi.fn(),
+  useReplaceBookmark: vi.fn(),
 }));
 
 const mutation = {
@@ -43,6 +45,7 @@ describe('BookmarksPage', () => {
     } as never);
     vi.mocked(useDeleteBookmark).mockReturnValue(mutation as never);
     vi.mocked(useCreateBookmark).mockReturnValue(mutation as never);
+    vi.mocked(useReplaceBookmark).mockReturnValue(mutation as never);
   });
 
   it('sends the explicit uncategorised filter and resets pagination', async () => {

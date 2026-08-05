@@ -21,7 +21,7 @@ The gate includes:
 - Authenticated backend end-to-end tests.
 - Backend and frontend production builds.
 
-Latest local Session 14 result (2026-08-05): frontend 32 tests, backend unit 16 tests, PostgreSQL integration 4 tests, backend end-to-end 50 tests, format check, lint, strict TypeScript checks, and both production builds passed.
+Latest local Session 15 result (2026-08-05): frontend 38 tests, backend unit 16 tests, PostgreSQL integration 4 tests, backend end-to-end 50 tests, format check, lint, strict TypeScript checks, and both production builds passed.
 
 Authentication tests use controlled local signing keys and deterministic JWKS behavior. They cover valid Access Tokens, missing/malformed credentials, invalid signatures and key IDs, disallowed algorithms, incorrect issuer/audience, ID Token rejection, temporal claims, missing/empty subject claims, and malformed tokens.
 
@@ -84,9 +84,16 @@ The first GitHub-hosted run exposed a clean-runner ordering gap: the seed import
 
 ## Deferred Scope
 
-- Frontend PUT/PATCH edit screens are optional and deferred; backend PUT/PATCH behavior is implemented and tested.
 - Sharing is intentionally not implemented because it conflicts with the private personal-resource requirement.
-- The frontend requirement explicitly names list, detail, create, delete, and bookmark filtering; it does not require edit screens. Planned bonus scope is implemented.
+- Frontend edit screens are not required by the brief but are implemented for a complete manual workflow. Planned bonus scope is implemented.
+
+## Session 15 Frontend Edit Verification
+
+- Collection detail exposes one Edit action, prefills the current name, disables Save until the normalized name changes, and submits `PATCH /collections/:id` with only `{ name }`.
+- Bookmark detail exposes one Edit action, prefills all editable fields, permits collection movement/uncategorisation, disables Save until normalized data changes, and submits the complete PUT shape.
+- Successful mutations write the returned resource into its detail cache and invalidate collection, bookmark, nested-list, and overview query families as applicable.
+- Dialog tests cover prefill, unchanged-state protection, PATCH/PUT payloads, and create/edit separation. Page tests prove both detail routes open the correct edit dialog. Mutation-hook tests prove HTTP methods, bodies, and detail cache updates.
+- The UI does not expose PUT/PATCH terminology to users; both flows are labelled Edit/Save changes and preserve pending/error behavior from the create dialogs.
 
 ## Session 14 Final Submission Audit
 
