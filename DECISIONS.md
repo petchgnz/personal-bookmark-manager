@@ -123,3 +123,11 @@ Decision: GitHub Actions uses a PostgreSQL 17 service container, installs only f
 Reason: database and privacy behavior cannot be represented honestly by SQLite or mocked persistence. A fresh service per CI job proves migration compatibility and prevents state from one run affecting another. Real Auth0 credentials are deliberately excluded; cryptographic and API authentication tests use controlled local keys, while the real tenant flow remains a documented manual smoke test.
 
 Security impact: workflow permissions are read-only, no repository secrets are required, and the database credentials exist only inside the disposable CI job. CI runs on Linux because GitHub service containers require a Linux runner.
+
+## 2026-08-05 - `/all` Uses Two Owner-Scoped Reads
+
+Decision: expose the first-priority bonus as authenticated `GET /all`, returning owned collections with nested bookmarks and a separate uncategorised list. Empty collections are retained. The frontend `/all` page is a read-only overview linking to existing bookmark details.
+
+Decision: query owned collections and owned bookmarks once each inside a transaction, then group bookmarks in application memory. Do not query bookmarks once per collection and do not add a schema change or dependency.
+
+Reason: the two-query design has constant database query count, produces a consistent overview, and makes privacy predicates explicit on both resource tables. The endpoint is deliberately unpaginated to match the assignment's small-scale “all” bonus; production-scale unbounded data would require a revised bounded or cursor-paginated contract.

@@ -22,6 +22,7 @@ Required routes:
 
 ```text
 GET    /me
+GET    /all
 
 GET    /collections
 GET    /collections/:id
@@ -169,3 +170,25 @@ For the nested route, a missing or cross-owner collection returns the identical 
 | Display name | 200 characters |
 
 Request validation enforces all Collection and Bookmark API limits before persistence.
+
+## `GET /all` Bonus Overview
+
+Returns every owned collection with its owned bookmarks plus a separate `uncategorisedBookmarks` array. Empty collections remain visible. Collections and bookmarks use the same fields and deterministic ordering as their existing list endpoints.
+
+```json
+{
+  "collections": [
+    {
+      "id": "collection-uuid",
+      "name": "Engineering",
+      "ownerId": "user-uuid",
+      "createdAt": "2026-08-05T00:00:00.000Z",
+      "updatedAt": "2026-08-05T00:00:00.000Z",
+      "bookmarks": []
+    }
+  ],
+  "uncategorisedBookmarks": []
+}
+```
+
+The endpoint runs exactly two owner-scoped reads in one transaction—one for collections and one for bookmarks—and groups them in memory. Query count therefore does not grow with the number of collections. No foreign rows, counts, or relation identifiers enter the response. The endpoint is intentionally unpaginated because it implements the assignment's `/all` overview; it is suitable for the take-home data scale, while a production system with unbounded user data should use a bounded or cursor-paginated grouped contract.

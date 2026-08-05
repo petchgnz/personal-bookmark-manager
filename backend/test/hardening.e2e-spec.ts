@@ -31,6 +31,7 @@ describe('API hardening (e2e)', () => {
   it.each([
     ['get', '/'],
     ['get', '/me'],
+    ['get', '/all'],
     ['get', '/collections'],
     ['post', '/collections'],
     ['get', `/collections/${id}`],
