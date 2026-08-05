@@ -87,7 +87,7 @@ The backend accepts browser requests only from `FRONTEND_ORIGIN`, defaulting to 
 
 Authenticated clients can create, list, view, replace, patch, and delete collections under `/collections`. Lists use `page`/`limit` offset pagination with defaults `1`/`20` and a maximum limit of `100`; optional `name` performs a trimmed, case-insensitive contains filter. Missing and cross-owner resources both return the same `404`; filtered rows and totals never include another user's collections. See `API_DESIGN.md` for the exact contract.
 
-The frontend supports collection list, detail, create, rename, and confirmed delete flows. Rename uses the partial Collection `PATCH` contract. Deletion clearly states that contained bookmarks survive as uncategorised bookmarks.
+The frontend supports collection list, detail, create, rename, name filtering, and confirmed delete flows. The filter is URL-backed, resets pagination when submitted or cleared, and preserves the active search while paging. Rename uses the partial Collection `PATCH` contract. Deletion clearly states that contained bookmarks survive as uncategorised bookmarks.
 
 ## Bookmarks
 

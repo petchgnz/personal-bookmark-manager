@@ -21,7 +21,7 @@ The gate includes:
 - Authenticated backend end-to-end tests.
 - Backend and frontend production builds.
 
-Latest local Session 16 result (2026-08-05): frontend 38 tests, backend unit 16 tests, PostgreSQL integration 4 tests, backend end-to-end 53 tests, format check, non-mutating lint, strict TypeScript checks, and both production builds passed.
+Latest local Session 16 result (2026-08-06): frontend 41 tests, backend unit 16 tests, PostgreSQL integration 4 tests, backend end-to-end 53 tests, format check, non-mutating lint, strict TypeScript checks, and both production builds passed.
 
 Authentication tests use controlled local signing keys and deterministic JWKS behavior. They cover valid Access Tokens, missing/malformed credentials, invalid signatures and key IDs, disallowed algorithms, incorrect issuer/audience, ID Token rejection, temporal claims, missing/empty subject claims, and malformed tokens.
 
@@ -47,6 +47,8 @@ Review date: 2026-08-05.
 - Backend `lint` is non-mutating; explicit `lint:fix` remains available for local correction.
 - Root engines, CI, and Docker stages use Node 22.22.2 after the first Compose rebuild exposed a frontend test-dependency `EBADENGINE` warning under 22.22.0.
 - The API contract now states every success status and the root README contains a complete fresh-clone setup/run path.
+- The Collections page submits a trimmed URL-backed name filter, resets pagination on search/clear, retains the filter while paging, and shows a filter-aware empty state.
+- Browser smoke reached the expected Auth0 login boundary in a fresh in-app session; post-login visual interaction remains a manual check because no authenticated browser session or credentials were used during automated verification.
 
 ## Two-User Privacy Verification
 
