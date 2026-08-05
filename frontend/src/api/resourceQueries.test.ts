@@ -13,4 +13,10 @@ describe('resource query builders', () => {
   it('builds the explicit uncategorised filter', () => {
     expect(buildBookmarkQuery({ page: 3, limit: 20, uncategorised: true })).toBe('page=3&limit=20&uncategorised=true')
   })
+
+  it('combines and encodes full-text search with an existing filter', () => {
+    expect(buildBookmarkQuery({ page: 1, limit: 20, collectionId: 'collection-id', search: 'prisma handbook' })).toBe(
+      'page=1&limit=20&collectionId=collection-id&search=prisma+handbook',
+    )
+  })
 })

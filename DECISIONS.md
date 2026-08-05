@@ -141,3 +141,13 @@ Decision: use multi-stage Node builds, a non-root backend runtime, a one-shot Pr
 Decision: frontend Auth0/API values are public runtime configuration, not build-time secrets. Nginx generates a non-cacheable `runtime-config.js` after validating a conservative character set. Local Vite loads an empty public fallback then uses `import.meta.env`; the container overrides those values at startup. A Client Secret or token is never accepted or required.
 
 Trade-off: the official Nginx image starts with its standard root entrypoint/master process so it can generate configuration and bind port 80; worker processes use the image's `nginx` account and Compose applies `no-new-privileges`. The backend application itself runs as the non-root `node` user. A stricter arbitrary-UID/read-only Nginx deployment would require writable tmp/cache mounts and is beyond this take-home bonus.
+
+## 2026-08-05 - Weighted PostgreSQL Full-Text Search
+
+Decision: extend `GET /bookmarks` with optional trimmed `search` input of 1–200 characters. Search title and notes with PostgreSQL's English configuration, assign title weight A and notes weight B, parse user input with `websearch_to_tsquery`, and rank with `ts_rank_cd` before deterministic timestamp/ID ordering. Search may be combined with one existing collection/uncategorised filter and retains bounded offset pagination.
+
+Decision: create a GIN expression index in a committed migration rather than add a stored search column. Prisma's schema DSL does not represent this weighted PostgreSQL expression index, so migration SQL is the authoritative definition. CRUD remains unchanged, existing rows require no data rewrite, and rollback consists only of dropping the new index.
+
+Decision: use `$queryRaw` with `Prisma.sql` fragments and value binding for this database-specific feature; never use `$queryRawUnsafe`, concatenate search input, or make table/column names dynamic. Both data and count statements begin with the authenticated `owner_id` predicate and apply identical search/filter predicates.
+
+Reason: this provides stemming, phrase/web syntax, relevance ordering, and an indexable query while retaining the privacy and pagination contract. Title weighting produces more useful ranking than treating long notes and concise titles equally.

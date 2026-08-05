@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import type { Prisma } from '../generated/prisma/client';
+import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../database/prisma.service';
 import type { PaginationQueryDto } from '../collections/dto/pagination-query.dto';
 import type { BookmarkQueryDto } from './dto/bookmark-query.dto';
@@ -17,6 +17,17 @@ const bookmarkSelect = {
   createdAt: true,
   updatedAt: true,
 } as const;
+
+export interface BookmarkRow {
+  id: string;
+  url: string;
+  title: string;
+  notes: string | null;
+  collectionId: string | null;
+  ownerId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 function bookmarkNotFound(): NotFoundException {
   return new NotFoundException({
@@ -59,12 +70,76 @@ export class BookmarksService {
   }
 
   async findAll(ownerId: string, query: BookmarkQueryDto) {
+    if (query.search !== undefined) {
+      return this.findSearchPage(ownerId, query);
+    }
+
     const where: Prisma.BookmarkWhereInput = {
       ownerId,
       ...(query.collectionId ? { collectionId: query.collectionId } : {}),
       ...(query.uncategorised ? { collectionId: null } : {}),
     };
     return this.findPage(where, query);
+  }
+
+  private async findSearchPage(ownerId: string, query: BookmarkQueryDto) {
+    const searchDocument = Prisma.sql`
+      setweight(to_tsvector('english', COALESCE(b.title, '')), 'A') ||
+      setweight(to_tsvector('english', COALESCE(b.notes, '')), 'B')
+    `;
+    const searchQuery = Prisma.sql`websearch_to_tsquery('english', ${query.search})`;
+    const predicates = [
+      Prisma.sql`b.owner_id = ${ownerId}::uuid`,
+      Prisma.sql`${searchDocument} @@ ${searchQuery}`,
+    ];
+
+    if (query.collectionId) {
+      predicates.push(
+        Prisma.sql`b.collection_id = ${query.collectionId}::uuid`,
+      );
+    } else if (query.uncategorised) {
+      predicates.push(Prisma.sql`b.collection_id IS NULL`);
+    }
+
+    const where = Prisma.join(predicates, ' AND ');
+    const skip = (query.page - 1) * query.limit;
+    const [data, countRows] = await this.prisma.$transaction([
+      this.prisma.$queryRaw<BookmarkRow[]>(Prisma.sql`
+        SELECT
+          b.id,
+          b.url,
+          b.title,
+          b.notes,
+          b.collection_id AS "collectionId",
+          b.owner_id AS "ownerId",
+          b.created_at AS "createdAt",
+          b.updated_at AS "updatedAt"
+        FROM bookmarks b
+        WHERE ${where}
+        ORDER BY
+          ts_rank_cd(${searchDocument}, ${searchQuery}) DESC,
+          b.created_at DESC,
+          b.id DESC
+        OFFSET ${skip}
+        LIMIT ${query.limit}
+      `),
+      this.prisma.$queryRaw<Array<{ total: number }>>(Prisma.sql`
+        SELECT COUNT(*)::integer AS total
+        FROM bookmarks b
+        WHERE ${where}
+      `),
+    ]);
+    const total = countRows[0]?.total ?? 0;
+
+    return {
+      data,
+      meta: {
+        page: query.page,
+        limit: query.limit,
+        total,
+        totalPages: Math.ceil(total / query.limit),
+      },
+    };
   }
 
   async findByCollection(

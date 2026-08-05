@@ -135,7 +135,10 @@ List filters extend the same `page`/`limit` contract used by Collections:
 - `collectionId=<uuid>` returns bookmarks in that collection without exposing whether a foreign collection exists.
 - `uncategorised=true` explicitly returns bookmarks whose `collectionId` is `null`.
 - The two filters are mutually exclusive. `uncategorised=false`, unknown filters, and invalid values return `400`.
-- Full-text `search` is not accepted; it remains bonus scope.
+- Optional `search` is trimmed, must contain 1–200 characters, and performs PostgreSQL full-text search over title (weight A) and notes (weight B) using the English text configuration. It may be combined with either `collectionId` or `uncategorised=true`.
+- Search input uses `websearch_to_tsquery`: quoted phrases, `OR`, and leading `-` exclusion follow PostgreSQL web-search semantics; other punctuation is handled safely rather than being interpreted as SQL.
+- Search results are ordered by cover-density relevance, then `createdAt DESC, id DESC`; rows and totals remain paginated and owner-scoped.
+- The weighted GIN expression index is defined by the committed migration because Prisma schema DSL cannot represent this PostgreSQL expression index. Search SQL uses parameter-bound `Prisma.sql`; no unsafe raw query API or interpolated SQL string is used.
 
 For the nested route, a missing or cross-owner collection returns the identical Collection `404`; an owned empty collection returns a paginated `200` with empty `data`. Both bookmark rows and totals include `ownerId` and `collectionId` predicates.
 

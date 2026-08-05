@@ -21,7 +21,7 @@ The gate includes:
 - Authenticated backend end-to-end tests.
 - Backend and frontend production builds.
 
-Latest local Session 12 result (2026-08-05): frontend 29 tests, backend unit 16 tests, PostgreSQL integration 3 tests, backend end-to-end 49 tests, format check, lint, strict TypeScript checks, and both production builds passed.
+Latest local Session 13 result (2026-08-05): frontend 31 tests, backend unit 16 tests, PostgreSQL integration 4 tests, backend end-to-end 50 tests, format check, lint, strict TypeScript checks, and both production builds passed.
 
 Authentication tests use controlled local signing keys and deterministic JWKS behavior. They cover valid Access Tokens, missing/malformed credentials, invalid signatures and key IDs, disallowed algorithms, incorrect issuer/audience, ID Token rejection, temporal claims, missing/empty subject claims, and malformed tokens.
 
@@ -86,7 +86,15 @@ The first GitHub-hosted run exposed a clean-runner ordering gap: the seed import
 
 - Frontend PUT/PATCH edit screens are optional and deferred; backend PUT/PATCH behavior is implemented and tested.
 - Sharing is intentionally not implemented because it conflicts with the private personal-resource requirement.
-- Full-text search remains optional bonus scope.
+- Frontend PUT/PATCH edit screens remain optional and deferred; sharing remains intentionally excluded by the private-resource decision. Planned bonus scope is implemented.
+
+## Session 13 Full-Text Search Verification
+
+- A committed non-destructive migration adds a weighted GIN expression index over title and notes; no bookmark data or column changes.
+- Database integration inspects the live PostgreSQL index definition for GIN, English `to_tsvector`, and title/notes weights.
+- PostgreSQL-backed e2e tests cover title and notes matches, stemming, title-first relevance, collection and uncategorised filters, bounded pagination totals, injection-shaped punctuation, and two-user isolation.
+- Both result and count queries bind values through `Prisma.sql` and contain authenticated `owner_id` predicates; no unsafe raw query API is used.
+- Frontend tests cover URL encoding plus trimmed search combined with the active filter and pagination reset.
 
 ## Session 12 Container Verification
 

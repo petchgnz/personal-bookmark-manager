@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { type FormEvent, useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
@@ -29,12 +29,15 @@ export function BookmarksPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Math.max(1, Number(searchParams.get('page')) || 1);
   const filter = searchParams.get('filter') ?? 'all';
+  const search = searchParams.get('search')?.trim() ?? '';
+  const [searchInput, setSearchInput] = useState(search);
   const filters: BookmarkFilters = {
     page,
     limit: pageSize,
     ...(filter === 'uncategorised' ? { uncategorised: true }
     : filter === 'all' ? {}
     : { collectionId: filter }),
+    ...(search ? { search } : {}),
   };
   const bookmarks = useBookmarks(filters);
   const collections = useCollections(1, allCollectionsLimit);
@@ -46,8 +49,24 @@ export function BookmarksPage() {
       deleteBookmark.error.message
     : 'Bookmark could not be deleted.';
 
-  const setFilter = (value: string) =>
-    setSearchParams(value === 'all' ? {} : { filter: value });
+  useEffect(() => setSearchInput(search), [search]);
+
+  const setFilter = (value: string) => {
+    const next = new URLSearchParams(searchParams);
+    next.delete('page');
+    if (value === 'all') next.delete('filter');
+    else next.set('filter', value);
+    setSearchParams(next);
+  };
+  const submitSearch = (event: FormEvent) => {
+    event.preventDefault();
+    const next = new URLSearchParams(searchParams);
+    const trimmedSearch = searchInput.trim();
+    next.delete('page');
+    if (trimmedSearch) next.set('search', trimmedSearch);
+    else next.delete('search');
+    setSearchParams(next);
+  };
   return (
     <Stack spacing={3}>
       <Stack direction='row' className='items-center justify-between gap-4'>
@@ -61,21 +80,53 @@ export function BookmarksPage() {
           New bookmark
         </Button>
       </Stack>
-      <TextField
-        select
-        label='Filter'
-        value={filter}
-        className='max-w-sm'
-        onChange={(event) => setFilter(event.target.value)}
-      >
-        <MenuItem value='all'>All bookmarks</MenuItem>
-        <MenuItem value='uncategorised'>Uncategorised</MenuItem>
-        {collections.data?.data.map((collection) => (
-          <MenuItem key={collection.id} value={collection.id}>
-            {collection.name}
-          </MenuItem>
-        ))}
-      </TextField>
+      <Stack direction='row' className='flex-wrap items-start gap-3'>
+        <TextField
+          select
+          label='Filter'
+          value={filter}
+          className='min-w-64'
+          onChange={(event) => setFilter(event.target.value)}
+        >
+          <MenuItem value='all'>All bookmarks</MenuItem>
+          <MenuItem value='uncategorised'>Uncategorised</MenuItem>
+          {collections.data?.data.map((collection) => (
+            <MenuItem key={collection.id} value={collection.id}>
+              {collection.name}
+            </MenuItem>
+          ))}
+        </TextField>
+        <Stack
+          component='form'
+          direction='row'
+          className='min-w-72 grow gap-2'
+          onSubmit={submitSearch}
+        >
+          <TextField
+            label='Search bookmarks'
+            value={searchInput}
+            className='grow'
+            slotProps={{ htmlInput: { maxLength: 200 } }}
+            onChange={(event) => setSearchInput(event.target.value)}
+          />
+          <Button type='submit' variant='outlined'>
+            Search
+          </Button>
+          {search && (
+            <Button
+              onClick={() => {
+                setSearchInput('');
+                const next = new URLSearchParams(searchParams);
+                next.delete('search');
+                next.delete('page');
+                setSearchParams(next);
+              }}
+            >
+              Clear
+            </Button>
+          )}
+        </Stack>
+      </Stack>
       {bookmarks.isPending && <ResourceLoading label='Loading bookmarks' />}
       {bookmarks.isError && (
         <ResourceError onRetry={() => void bookmarks.refetch()} />
@@ -84,7 +135,8 @@ export function BookmarksPage() {
         <EmptyState
           title='No bookmarks found'
           message={
-            filter === 'all' ?
+            search ? `No bookmarks match “${search}”.`
+            : filter === 'all' ?
               'Save your first bookmark to see it here.'
             : 'There are no bookmarks matching this filter.'
           }
