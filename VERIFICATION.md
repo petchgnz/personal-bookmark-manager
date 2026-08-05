@@ -21,7 +21,7 @@ The gate includes:
 - Authenticated backend end-to-end tests.
 - Backend and frontend production builds.
 
-Latest local Session 11 result (2026-08-05): frontend 28 tests, backend unit 16 tests, PostgreSQL integration 3 tests, backend end-to-end 49 tests, format check, lint, strict TypeScript checks, and both production builds passed.
+Latest local Session 12 result (2026-08-05): frontend 29 tests, backend unit 16 tests, PostgreSQL integration 3 tests, backend end-to-end 49 tests, format check, lint, strict TypeScript checks, and both production builds passed.
 
 Authentication tests use controlled local signing keys and deterministic JWKS behavior. They cover valid Access Tokens, missing/malformed credentials, invalid signatures and key IDs, disallowed algorithms, incorrect issuer/audience, ID Token rejection, temporal claims, missing/empty subject claims, and malformed tokens.
 
@@ -86,4 +86,14 @@ The first GitHub-hosted run exposed a clean-runner ordering gap: the seed import
 
 - Frontend PUT/PATCH edit screens are optional and deferred; backend PUT/PATCH behavior is implemented and tested.
 - Sharing is intentionally not implemented because it conflicts with the private personal-resource requirement.
-- Application Dockerfiles and full-text search remain optional bonus scope.
+- Full-text search remains optional bonus scope.
+
+## Session 12 Container Verification
+
+- Compose configuration validates with the application profile while the default profile remains PostgreSQL-only.
+- Backend, migration, and frontend images build from the repository root with `.env`, dependency directories, build output, transcripts, and confidential material excluded from the build context.
+- The migration container completed against the internal PostgreSQL hostname before the backend started.
+- PostgreSQL, backend, and frontend container health checks reached healthy state.
+- Nginx returned `200` for `/healthz`, served SPA deep-link fallback, generated runtime configuration without unresolved placeholders, and returned `Cache-Control: no-store` for that configuration.
+- The containerized backend returned the expected unauthenticated `401` and allowed CORS only for the configured frontend origin during smoke verification.
+- The backend final image runs as `node`, is installed with `--omit=dev`, and excludes Jest. Prisma 7's client still brings Prisma CLI/TypeScript packages transitively; this is documented rather than represented as a fully artifact-only runtime. Frontend public runtime configuration is injected at startup without a Client Secret.

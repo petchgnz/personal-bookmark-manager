@@ -97,12 +97,58 @@ See `VERIFICATION.md` for the security review, two-user privacy matrix, real Aut
 
 GitHub Actions runs on pushes to `main`/`dev` and on pull requests. Each run installs the committed lockfile with `npm ci`, starts an isolated PostgreSQL 17 service, generates Prisma Client, applies the committed migration, runs the deterministic seed, and executes `npm run verify`. CI does not use real Auth0 credentials; token-validation tests use controlled local keys.
 
+## Docker Application Stack Bonus
+
+The default Compose behavior remains database-only for the local development workflow:
+
+```shell
+docker compose up -d
+```
+
+To build and run PostgreSQL, a one-shot migration job, the production NestJS API, and the Nginx-served React application:
+
+```shell
+docker compose --profile app up --build -d
+docker compose --profile app ps
+```
+
+The full stack uses the existing ignored `backend/.env` and `frontend/.env` files. The backend container overrides `DATABASE_URL` to use the internal `postgres:5432` service while retaining the configured OIDC issuer/audience/JWKS values. The frontend container accepts only these public runtime values:
+
+- `VITE_AUTH0_DOMAIN`
+- `VITE_AUTH0_CLIENT_ID`
+- `VITE_AUTH0_AUDIENCE`
+- `VITE_API_BASE_URL`
+
+Do not add an Auth0 Client Secret, password, Access Token, or other secret to frontend configuration. Nginx generates `/runtime-config.js` when the container starts, validates the public value formats, and serves the file with `Cache-Control: no-store`; the same frontend image can therefore be configured without rebuilding it. Local Vite development continues to use `frontend/.env` through the committed empty fallback file.
+
+Service startup is ordered as follows:
+
+```text
+PostgreSQL healthy -> migration completed -> backend healthy -> frontend
+```
+
+Both application images use multi-stage builds. The backend runs as the non-root Node user and installs with `npm ci --omit=dev`; the separate migration target retains the full build workspace required for `prisma migrate deploy`. Prisma 7's production client currently brings its CLI/TypeScript packages transitively, so the runtime is larger than an ideal artifact-only Node image even though direct test/build dev dependencies such as Jest are omitted. The frontend final image contains only Nginx, static build output, and runtime-config templates.
+
+Smoke endpoints and ports:
+
+- Frontend: `http://localhost:3000`; unauthenticated health check at `/healthz`.
+- Backend: `http://localhost:3001`; its Docker health check treats the expected authenticated-root `401` as proof that the HTTP boundary is ready.
+- PostgreSQL host mapping remains `localhost:5433`; containers use `postgres:5432` internally.
+
+Stop the full stack without deleting the database volume:
+
+```shell
+docker compose --profile app down
+```
+
+Add `--volumes` only when intentionally deleting local PostgreSQL data.
+
 ## Completed and Deferred Scope
 
-Completed scope includes all required backend verbs, owner-scoped filters and nested routes, collection/bookmark list/detail/create/delete UI, pagination, destructive confirmations, real Auth0 login/callback/logout smoke testing, two-user privacy verification, and the `/all` bonus overview.
+Completed scope includes all required backend verbs, owner-scoped filters and nested routes, collection/bookmark list/detail/create/delete UI, pagination, destructive confirmations, real Auth0 login/callback/logout smoke testing, two-user privacy verification, the `/all` bonus overview, and production-style application Dockerfiles with a verified full-stack Compose profile.
 
 Deferred by design:
 
 - Frontend PUT/PATCH edit screens. The fully tested backend endpoints remain available.
 - Sharing, because the assignment requires personal private resources; its design is recorded in `DECISIONS.md`.
-- Application Dockerfiles and PostgreSQL full-text search remain optional bonus work.
+- PostgreSQL full-text search remains optional bonus work.
