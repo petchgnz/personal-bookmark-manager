@@ -144,13 +144,41 @@ describe('collections (e2e)', () => {
     });
   });
 
+  it('filters names case-insensitively without leaking foreign rows or totals', async () => {
+    await createCollection('collection-token-a', 'Engineering Articles');
+    await createCollection('collection-token-a', 'Personal Reading');
+    await createCollection('collection-token-a', 'Engineering Videos');
+    await createCollection('collection-token-b', 'Private Engineering');
+
+    const response = await request(app.getHttpServer())
+      .get('/collections?name=%20ENGINEER%20&page=1&limit=1')
+      .set('Authorization', auth('collection-token-a'))
+      .expect(200);
+    const body = response.body as {
+      data: CollectionBody[];
+      meta: Record<string, number>;
+    };
+
+    expect(body.data).toHaveLength(1);
+    expect(body.data[0]?.name.toLowerCase()).toContain('engineer');
+    expect(body.data[0]?.name).not.toBe('Private Engineering');
+    expect(body.meta).toEqual({
+      page: 1,
+      limit: 1,
+      total: 2,
+      totalPages: 2,
+    });
+  });
+
   it.each([
     '/collections?page=0',
     '/collections?limit=101',
     '/collections?page=one',
     '/collections?page=1000001',
+    '/collections?name=%20%20%20',
+    `/collections?name=${'a'.repeat(121)}`,
     '/collections?unexpected=true',
-  ])('rejects invalid pagination query %s', async (path) => {
+  ])('rejects invalid list query %s', async (path) => {
     await request(app.getHttpServer())
       .get(path)
       .set('Authorization', auth('collection-token-a'))

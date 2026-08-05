@@ -41,7 +41,7 @@ DELETE /bookmarks/:id
 GET    /collections/:id/bookmarks
 ```
 
-Implementation details, validation limits, query parameters, error codes, and privacy behavior must be added as the backend is implemented.
+Successful single-resource reads and updates return `200`; creates return `201`; deletes return `204` with no response body. Paginated list routes return `200` with `{ data, meta }`.
 
 ## Authentication Boundary
 
@@ -74,19 +74,20 @@ Collection responses contain `id`, `name`, `ownerId`, `createdAt`, and `updatedA
 
 | Method | Path | Behavior |
 |---|---|---|
-| `POST` | `/collections` | Create an owned collection; returns `201` with the resource. |
-| `GET` | `/collections` | Return an owner-scoped paginated list. |
-| `GET` | `/collections/:id` | Return one owned collection. |
-| `PUT` | `/collections/:id` | Fully replace editable fields; `name` is required. |
-| `PATCH` | `/collections/:id` | Update an explicitly provided `name`; omitted/empty input and `null` are invalid. |
-| `DELETE` | `/collections/:id` | Delete an owned collection; returns `204`. Related bookmarks survive and become uncategorised. |
+| `POST` | `/collections` | `201`; create and return an owned collection. |
+| `GET` | `/collections` | `200`; return an owner-scoped paginated/filterable list. |
+| `GET` | `/collections/:id` | `200`; return one owned collection. |
+| `PUT` | `/collections/:id` | `200`; fully replace editable fields; `name` is required. |
+| `PATCH` | `/collections/:id` | `200`; update an explicitly provided `name`; omitted/empty input and `null` are invalid. |
+| `DELETE` | `/collections/:id` | `204` with no body; delete an owned collection. Related bookmarks survive and become uncategorised. |
 
 List query parameters:
 
 - `page`: integer from `1` through `1,000,000`, default `1`.
 - `limit`: integer from `1` through `100`, default `20`.
+- `name`: optional trimmed string from `1` through `120` characters; performs a case-insensitive contains match against owned collection names.
 - Unknown, zero, negative, non-integer, or excessive query values return `400` rather than being silently adjusted.
-- Results are ordered by `createdAt DESC, id DESC`. Both rows and totals are scoped to the authenticated internal `ownerId`.
+- Results are ordered by `createdAt DESC, id DESC`. Filtered rows and totals use the same name predicate and are scoped to the authenticated internal `ownerId`.
 
 All read and mutation predicates contain `ownerId`. Missing and cross-owner identifiers return the identical safe response:
 
@@ -114,13 +115,13 @@ Bookmark responses contain `id`, `url`, `title`, `notes`, `collectionId`, `owner
 
 | Method | Path | Behavior |
 |---|---|---|
-| `POST` | `/bookmarks` | Create an owned bookmark; `notes` and `collectionId` default to `null`. |
-| `GET` | `/bookmarks` | Return an owner-scoped paginated/filterable list. |
-| `GET` | `/bookmarks/:id` | Return one owned bookmark. |
-| `PUT` | `/bookmarks/:id` | Fully replace editable fields; all four fields are required, using explicit `null` for cleared nullable fields. |
-| `PATCH` | `/bookmarks/:id` | Update explicitly provided fields; `notes` and `collectionId` accept `null`; `url` and `title` do not. |
-| `DELETE` | `/bookmarks/:id` | Delete an owned bookmark and return `204`. |
-| `GET` | `/collections/:id/bookmarks` | Authorize the collection, then return only its owner-scoped bookmarks. |
+| `POST` | `/bookmarks` | `201`; create an owned bookmark; `notes` and `collectionId` default to `null`. |
+| `GET` | `/bookmarks` | `200`; return an owner-scoped paginated/filterable list. |
+| `GET` | `/bookmarks/:id` | `200`; return one owned bookmark. |
+| `PUT` | `/bookmarks/:id` | `200`; fully replace editable fields; all four fields are required, using explicit `null` for cleared nullable fields. |
+| `PATCH` | `/bookmarks/:id` | `200`; update explicitly provided fields; `notes` and `collectionId` accept `null`; `url` and `title` do not. |
+| `DELETE` | `/bookmarks/:id` | `204` with no body; delete an owned bookmark. |
+| `GET` | `/collections/:id/bookmarks` | `200`; authorize the collection, then return only its owner-scoped bookmarks. |
 
 Validation:
 

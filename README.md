@@ -25,9 +25,32 @@ The core assignment is implemented: npm workspaces, PostgreSQL persistence, the 
 
 ## Prerequisites
 
-- Node.js 22.22.0 or newer within the Node 22 release line
+- Node.js 22.22.2 or newer within the Node 22 release line
 - npm 10 or newer
 - Docker with Docker Compose
+
+## Fresh Clone Setup and Local Run
+
+From the repository root:
+
+```powershell
+npm ci
+Copy-Item backend/.env.example backend/.env
+Copy-Item frontend/.env.example frontend/.env
+# Replace only VITE_AUTH0_CLIENT_ID in frontend/.env with the provided public SPA Client ID.
+docker compose up -d postgres
+npm run prisma:migrate:deploy --workspace=backend
+npm run prisma:seed --workspace=backend
+```
+
+Start the API and website in separate terminals:
+
+```powershell
+npm run start:dev --workspace=backend
+npm run dev --workspace=frontend
+```
+
+Open `http://localhost:3000`. The authenticated API listens on `http://localhost:3001`, and PostgreSQL is mapped to host port `5433`.
 
 ## Database Setup
 
@@ -62,9 +85,9 @@ The backend accepts browser requests only from `FRONTEND_ORIGIN`, defaulting to 
 
 ## Collections
 
-Authenticated clients can create, list, view, replace, patch, and delete collections under `/collections`. Lists use `page`/`limit` offset pagination with defaults `1`/`20` and a maximum limit of `100`. Missing and cross-owner resources both return the same `404`; pagination rows and totals never include another user's collections. See `API_DESIGN.md` for the exact contract.
+Authenticated clients can create, list, view, replace, patch, and delete collections under `/collections`. Lists use `page`/`limit` offset pagination with defaults `1`/`20` and a maximum limit of `100`; optional `name` performs a trimmed, case-insensitive contains filter. Missing and cross-owner resources both return the same `404`; filtered rows and totals never include another user's collections. See `API_DESIGN.md` for the exact contract.
 
-The frontend supports collection list, detail, create, rename, and confirmed delete flows. Rename uses the partial Collection `PATCH` contract. Deletion clearly states that contained bookmarks survive as uncategorised bookmarks.
+The frontend supports collection list, detail, create, rename, name filtering, and confirmed delete flows. The filter is URL-backed, resets pagination when submitted or cleared, and preserves the active search while paging. Rename uses the partial Collection `PATCH` contract. Deletion clearly states that contained bookmarks survive as uncategorised bookmarks.
 
 ## Bookmarks
 

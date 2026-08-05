@@ -17,7 +17,7 @@
     "verify": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run test:db && npm run test:e2e && npm run build"
   },
   "engines": {
-    "node": ">=22.22.0",
+    "node": ">=22.22.2 <23",
     "npm": ">=10.0.0"
   }
 }

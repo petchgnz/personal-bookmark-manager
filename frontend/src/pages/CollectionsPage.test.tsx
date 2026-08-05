@@ -88,4 +88,39 @@ describe('CollectionsPage', () => {
     );
     expect(screen.getByText('No collections yet')).toBeInTheDocument();
   });
+
+  it('submits a trimmed name filter and resets pagination', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={['/collections?page=3']}>
+        <CollectionsPage />
+      </MemoryRouter>,
+    );
+
+    await user.type(
+      screen.getByRole('textbox', { name: 'Search collections' }),
+      '  Engineering  ',
+    );
+    await user.click(screen.getByRole('button', { name: 'Search' }));
+
+    expect(useCollections).toHaveBeenLastCalledWith(1, 20, 'Engineering');
+  });
+
+  it('shows a filter-aware empty state', () => {
+    vi.mocked(useCollections).mockReturnValue({
+      data: { data: [], meta: { page: 1, limit: 20, total: 0, totalPages: 0 } },
+      isPending: false,
+      isError: false,
+    } as never);
+    render(
+      <MemoryRouter initialEntries={['/collections?search=Engineering']}>
+        <CollectionsPage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText('No collections found')).toBeInTheDocument();
+    expect(
+      screen.getByText('No collections match “Engineering”.'),
+    ).toBeInTheDocument();
+  });
 });

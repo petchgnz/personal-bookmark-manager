@@ -171,3 +171,15 @@ Decision: add optional edit UI after manual testing showed that create/delete-on
 Reason: asking a person to choose PUT versus PATCH would expose transport semantics and create a poor UX. Reusing the create dialogs preserves validation and error behavior, while method-specific hooks keep the API contract explicit and testable.
 
 Trade-off: edit remains detail-page driven rather than adding inline controls to every list card. This keeps lists uncluttered and gives destructive/edit actions one predictable location. Successful mutations update detail caches immediately and invalidate every affected list/overview family.
+
+## 2026-08-05 - Collection Name Filtering Completes the Core Contract
+
+Decision: support optional `name` filtering on `GET /collections` as a trimmed, case-insensitive contains match with the existing Collection name limit of 120 characters. The required frontend Collection flow does not demand a filter control, so the backend contract remained independently usable; after the user verified the API and requested the UI, the existing Collections page gained a URL-backed search control using that contract.
+
+Reason: the assignment requires filtering for both resources but does not define a useful Collection predicate. Name contains matching is predictable for people, needs no schema change at the take-home data scale, and preserves duplicate-name behavior. Exact matching would be unnecessarily rigid; owner filtering alone is authorization, not the product-level filtering requested by the contract.
+
+Privacy impact: both result and count queries combine the same name predicate with the authenticated internal `ownerId`. PostgreSQL-backed tests include a matching foreign collection and prove it affects neither rows nor pagination totals.
+
+Frontend impact: query keys include the optional name so cached filtered/unfiltered lists remain distinct. Search submission and clearing reset pagination, pagination retains the current search, and the empty state names the active filter. The UI sends no new data beyond the documented API query.
+
+Compatibility follow-up: align the project engine, CI, and Docker build/runtime images on Node `22.22.2` within the Node 22 release line. A clean Session 16 Compose rebuild showed that the current frontend test dependency requires at least this patch version; the earlier `22.22.0` pin still built but emitted `EBADENGINE`. Restricting the root engine to `<23` also matches the documented Node 22 support policy.

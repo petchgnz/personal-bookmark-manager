@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import type { CollectionNameDto } from './dto/collection-name.dto';
-import type { PaginationQueryDto } from './dto/pagination-query.dto';
+import type { CollectionQueryDto } from './dto/collection-query.dto';
 import type { UpdateCollectionDto } from './dto/update-collection.dto';
 import { PrismaService } from '../database/prisma.service';
 
@@ -30,17 +30,23 @@ export class CollectionsService {
     });
   }
 
-  async findAll(ownerId: string, query: PaginationQueryDto) {
+  async findAll(ownerId: string, query: CollectionQueryDto) {
     const skip = (query.page - 1) * query.limit;
+    const where = {
+      ownerId,
+      ...(query.name
+        ? { name: { contains: query.name, mode: 'insensitive' as const } }
+        : {}),
+    };
     const [data, total] = await this.prisma.$transaction([
       this.prisma.collection.findMany({
-        where: { ownerId },
+        where,
         select: collectionSelect,
         orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         skip,
         take: query.limit,
       }),
-      this.prisma.collection.count({ where: { ownerId } }),
+      this.prisma.collection.count({ where }),
     ]);
 
     return {
