@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -9,58 +9,94 @@ import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import { ApiError } from '../api/apiClient';
-import { useCollections, useCreateBookmark } from '../api/resourceQueries';
+import {
+  useCollections,
+  useCreateBookmark,
+  useReplaceBookmark,
+} from '../api/resourceQueries';
+import type { Bookmark } from '../api/resourceTypes';
 
 const collectionLimit = 100;
 
 export function BookmarkFormDialog({
   open,
   initialCollectionId,
+  bookmark,
   onClose,
 }: {
   open: boolean;
   initialCollectionId?: string;
+  bookmark?: Bookmark;
   onClose: () => void;
 }) {
-  const [url, setUrl] = useState('');
-  const [title, setTitle] = useState('');
-  const [notes, setNotes] = useState('');
-  const [collectionId, setCollectionId] = useState(initialCollectionId ?? '');
+  const [url, setUrl] = useState(bookmark?.url ?? '');
+  const [title, setTitle] = useState(bookmark?.title ?? '');
+  const [notes, setNotes] = useState(bookmark?.notes ?? '');
+  const [collectionId, setCollectionId] = useState(
+    bookmark?.collectionId ?? initialCollectionId ?? '',
+  );
   const collections = useCollections(1, collectionLimit);
   const createBookmark = useCreateBookmark();
+  const replaceBookmark = useReplaceBookmark();
+  const isEditing = bookmark !== undefined;
+  const activeMutation = isEditing ? replaceBookmark : createBookmark;
+
+  useEffect(() => {
+    if (!open) return;
+    setUrl(bookmark?.url ?? '');
+    setTitle(bookmark?.title ?? '');
+    setNotes(bookmark?.notes ?? '');
+    setCollectionId(bookmark?.collectionId ?? initialCollectionId ?? '');
+  }, [bookmark, initialCollectionId, open]);
 
   const resetAndClose = () => {
-    setUrl('');
-    setTitle('');
-    setNotes('');
-    setCollectionId(initialCollectionId ?? '');
+    setUrl(bookmark?.url ?? '');
+    setTitle(bookmark?.title ?? '');
+    setNotes(bookmark?.notes ?? '');
+    setCollectionId(bookmark?.collectionId ?? initialCollectionId ?? '');
     createBookmark.reset();
+    replaceBookmark.reset();
     onClose();
   };
 
   const handleClose = () => {
-    if (!createBookmark.isPending) resetAndClose();
+    if (!activeMutation.isPending) resetAndClose();
   };
 
-  const submit = () =>
-    createBookmark.mutate(
-      {
-        url: url.trim(),
-        title: title.trim(),
-        notes: notes.trim() || null,
-        collectionId: collectionId || null,
-      },
-      { onSuccess: resetAndClose },
-    );
+  const input = {
+    url: url.trim(),
+    title: title.trim(),
+    notes: notes.trim() || null,
+    collectionId: collectionId || null,
+  };
+  const isDirty =
+    bookmark === undefined ||
+    input.url !== bookmark.url ||
+    input.title !== bookmark.title ||
+    input.notes !== bookmark.notes ||
+    input.collectionId !== bookmark.collectionId;
 
-  const isValid = url.trim().length > 0 && title.trim().length > 0;
+  const submit = () => {
+    if (bookmark) {
+      replaceBookmark.mutate(
+        { id: bookmark.id, input },
+        { onSuccess: resetAndClose },
+      );
+    } else {
+      createBookmark.mutate(input, { onSuccess: resetAndClose });
+    }
+  };
+
+  const isValid = input.url.length > 0 && input.title.length > 0;
   const message =
-    createBookmark.error instanceof ApiError ?
-      createBookmark.error.message
-    : 'Bookmark could not be created.';
+    activeMutation.error instanceof ApiError ?
+      activeMutation.error.message
+    : `Bookmark could not be ${isEditing ? 'updated' : 'created'}.`;
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth='sm'>
-      <DialogTitle>Create bookmark</DialogTitle>
+      <DialogTitle>
+        {isEditing ? 'Edit bookmark' : 'Create bookmark'}
+      </DialogTitle>
       <DialogContent>
         <Stack spacing={2} className='pt-2'>
           <TextField
@@ -99,7 +135,10 @@ export function BookmarkFormDialog({
             select
             label='Collection'
             value={collectionId}
-            disabled={collections.isPending || Boolean(initialCollectionId)}
+            disabled={
+              collections.isPending ||
+              (!isEditing && Boolean(initialCollectionId))
+            }
             onChange={(event) => setCollectionId(event.target.value)}
           >
             <MenuItem value=''>Uncategorised</MenuItem>
@@ -115,20 +154,20 @@ export function BookmarkFormDialog({
               uncategorised bookmark.
             </Alert>
           )}
-          {createBookmark.isError && <Alert severity='error'>{message}</Alert>}
+          {activeMutation.isError && <Alert severity='error'>{message}</Alert>}
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button disabled={createBookmark.isPending} onClick={handleClose}>
+        <Button disabled={activeMutation.isPending} onClick={handleClose}>
           Cancel
         </Button>
         <Button
-          loading={createBookmark.isPending}
-          disabled={!isValid}
+          loading={activeMutation.isPending}
+          disabled={!isValid || !isDirty}
           variant='contained'
           onClick={submit}
         >
-          Create
+          {isEditing ? 'Save changes' : 'Create'}
         </Button>
       </DialogActions>
     </Dialog>

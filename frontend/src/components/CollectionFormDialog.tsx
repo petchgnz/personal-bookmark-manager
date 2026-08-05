@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
@@ -7,41 +7,64 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
 import { ApiError } from '../api/apiClient';
-import { useCreateCollection } from '../api/resourceQueries';
+import {
+  useCreateCollection,
+  useUpdateCollection,
+} from '../api/resourceQueries';
+import type { Collection } from '../api/resourceTypes';
 
 export function CollectionFormDialog({
   open,
+  collection,
   onClose,
 }: {
   open: boolean;
+  collection?: Pick<Collection, 'id' | 'name'>;
   onClose: () => void;
 }) {
-  const [name, setName] = useState('');
+  const [name, setName] = useState(collection?.name ?? '');
   const createCollection = useCreateCollection();
+  const updateCollection = useUpdateCollection();
+  const isEditing = collection !== undefined;
+  const activeMutation = isEditing ? updateCollection : createCollection;
   const trimmedName = name.trim();
 
+  useEffect(() => {
+    if (open) setName(collection?.name ?? '');
+  }, [collection?.name, open]);
+
   const resetAndClose = () => {
-    setName('');
+    setName(collection?.name ?? '');
     createCollection.reset();
+    updateCollection.reset();
     onClose();
   };
 
   const handleClose = () => {
-    if (!createCollection.isPending) resetAndClose();
+    if (!activeMutation.isPending) resetAndClose();
   };
 
   const handleSubmit = () => {
     if (!trimmedName) return;
-    createCollection.mutate(trimmedName, { onSuccess: resetAndClose });
+    if (collection) {
+      updateCollection.mutate(
+        { id: collection.id, name: trimmedName },
+        { onSuccess: resetAndClose },
+      );
+    } else {
+      createCollection.mutate(trimmedName, { onSuccess: resetAndClose });
+    }
   };
 
   const message =
-    createCollection.error instanceof ApiError ?
-      createCollection.error.message
-    : 'Collection could not be created.';
+    activeMutation.error instanceof ApiError ?
+      activeMutation.error.message
+    : `Collection could not be ${isEditing ? 'updated' : 'created'}.`;
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth='sm'>
-      <DialogTitle>Create collection</DialogTitle>
+      <DialogTitle>
+        {isEditing ? 'Edit collection' : 'Create collection'}
+      </DialogTitle>
       <DialogContent className='space-y-4'>
         <TextField
           autoFocus
@@ -58,19 +81,21 @@ export function CollectionFormDialog({
           error={name.length > 0 && !trimmedName}
           helperText={`${name.length}/120`}
         />
-        {createCollection.isError && <Alert severity='error'>{message}</Alert>}
+        {activeMutation.isError && <Alert severity='error'>{message}</Alert>}
       </DialogContent>
       <DialogActions>
-        <Button disabled={createCollection.isPending} onClick={handleClose}>
+        <Button disabled={activeMutation.isPending} onClick={handleClose}>
           Cancel
         </Button>
         <Button
-          loading={createCollection.isPending}
-          disabled={!trimmedName}
+          loading={activeMutation.isPending}
+          disabled={
+            !trimmedName || (isEditing && trimmedName === collection.name)
+          }
           variant='contained'
           onClick={handleSubmit}
         >
-          Create
+          {isEditing ? 'Save changes' : 'Create'}
         </Button>
       </DialogActions>
     </Dialog>

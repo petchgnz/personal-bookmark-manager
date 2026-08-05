@@ -13,7 +13,7 @@ transcripts/   Session logs and verification evidence
 
 ## Status
 
-The core assignment is implemented: npm workspaces, PostgreSQL persistence, the complete owner-scoped API, Auth0 PKCE frontend authentication, required collection/bookmark screens, adversarial privacy tests, and deterministic CI verification. Every optional bonus item in the brief is also implemented: CI, application Dockerfiles, `/all`, and full-text search. Only optional frontend edit UI and sharing remain intentionally deferred.
+The core assignment is implemented: npm workspaces, PostgreSQL persistence, the complete owner-scoped API, Auth0 PKCE frontend authentication, collection/bookmark create-read-update-delete screens, adversarial privacy tests, and deterministic CI verification. Every optional bonus item in the brief is also implemented: CI, application Dockerfiles, `/all`, and full-text search. Only sharing remains intentionally deferred.
 
 ## Confidentiality
 
@@ -67,13 +67,13 @@ The backend accepts browser requests only from `FRONTEND_ORIGIN`, defaulting to 
 
 Authenticated clients can create, list, view, replace, patch, and delete collections under `/collections`. Lists use `page`/`limit` offset pagination with defaults `1`/`20` and a maximum limit of `100`. Missing and cross-owner resources both return the same `404`; pagination rows and totals never include another user's collections. See `API_DESIGN.md` for the exact contract.
 
-The frontend supports collection list, detail, create, and confirmed delete flows. Deletion clearly states that contained bookmarks survive as uncategorised bookmarks.
+The frontend supports collection list, detail, create, rename, and confirmed delete flows. Rename uses the partial Collection `PATCH` contract. Deletion clearly states that contained bookmarks survive as uncategorised bookmarks.
 
 ## Bookmarks
 
 Authenticated clients can manage bookmarks under `/bookmarks`, filter by `collectionId` or `uncategorised=true`, and list an owned collection through `/collections/:id/bookmarks`. URLs accept only absolute HTTP/HTTPS values. Every row, total, mutation, and relation check is owner-scoped; external collection relations and bookmark resources are hidden behind the same `404` behavior as missing data.
 
-The frontend supports bookmark list, detail, create, and confirmed delete flows, plus collection and uncategorised filters. External links open in a separate browsing context with `noopener noreferrer` protection.
+The frontend supports bookmark list, detail, create, full edit, and confirmed delete flows, plus collection and uncategorised filters. The edit dialog submits the complete editable Bookmark shape through `PUT`; external links open in a separate browsing context with `noopener noreferrer` protection.
 
 ## All Bookmarks Bonus
 
@@ -155,7 +155,6 @@ Completed scope includes all required backend verbs, owner-scoped filters and ne
 
 Deferred by design:
 
-- Frontend PUT/PATCH edit screens. The fully tested backend endpoints remain available.
 - Sharing, because the assignment requires personal private resources; its design is recorded in `DECISIONS.md`.
 
-The assignment explicitly requires PUT/PATCH for both backend resources, and those endpoints are implemented and tested. Its frontend section requires list, detail, create, delete, and bookmark filtering, but does not require edit screens; deferring that optional UI preserves the smaller, verifiable scope requested by the brief.
+The assignment explicitly requires PUT/PATCH for both backend resources. Although its frontend section does not require edit screens, Session 15 added a single natural Edit action per detail page after manual UX testing showed that create/delete-only flows were frustrating. HTTP semantics remain hidden from users: Collection rename uses PATCH and Bookmark full edit uses PUT.

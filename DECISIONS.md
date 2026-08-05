@@ -163,3 +163,11 @@ The decisions above were translated into explicit guardrails rather than left to
 - The agent was directed away from generic partial-update helpers. Separate PUT/PATCH DTOs, explicit omitted-versus-null semantics, rejected system fields, and two-user mutation tests encode the contract.
 
 These constraints were reviewed through the reusable `.agent/security-review.md` and `.agent/verify-privacy.md` workflows whenever endpoints or persistence behavior changed.
+
+## 2026-08-05 - One Edit Action with Method-Specific Mutations
+
+Decision: add optional edit UI after manual testing showed that create/delete-only frontend flows were frustrating. Keep HTTP vocabulary out of the interface. Collection rename uses PATCH because it changes one editable field; Bookmark edit uses PUT because the dialog loads and submits the complete editable shape.
+
+Reason: asking a person to choose PUT versus PATCH would expose transport semantics and create a poor UX. Reusing the create dialogs preserves validation and error behavior, while method-specific hooks keep the API contract explicit and testable.
+
+Trade-off: edit remains detail-page driven rather than adding inline controls to every list card. This keeps lists uncluttered and gives destructive/edit actions one predictable location. Successful mutations update detail caches immediately and invalidate every affected list/overview family.

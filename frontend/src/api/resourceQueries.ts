@@ -1,6 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApiClient } from './useApiClient'
-import type { Bookmark, BookmarkFilters, BookmarkOverview, Collection, CreateBookmarkInput, PaginatedResponse } from './resourceTypes'
+import type {
+  Bookmark,
+  BookmarkFilters,
+  BookmarkOverview,
+  Collection,
+  CreateBookmarkInput,
+  PaginatedResponse,
+  ReplaceBookmarkInput,
+} from './resourceTypes'
 
 export const resourceKeys = {
   collections: ['collections'] as const,
@@ -52,6 +60,23 @@ export function useCreateCollection() {
   })
 }
 
+export function useUpdateCollection() {
+  const apiRequest = useApiClient()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) =>
+      apiRequest<Collection>(`/collections/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ name }),
+      }),
+    onSuccess: (collection) => {
+      queryClient.setQueryData(resourceKeys.collection(collection.id), collection)
+      void queryClient.invalidateQueries({ queryKey: resourceKeys.collections })
+      void queryClient.invalidateQueries({ queryKey: resourceKeys.overview })
+    },
+  })
+}
+
 export function useDeleteCollection() {
   const apiRequest = useApiClient()
   const queryClient = useQueryClient()
@@ -92,6 +117,24 @@ export function useCreateBookmark() {
   return useMutation({
     mutationFn: (input: CreateBookmarkInput) => apiRequest<Bookmark>('/bookmarks', { method: 'POST', body: JSON.stringify(input) }),
     onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: resourceKeys.bookmarks })
+      void queryClient.invalidateQueries({ queryKey: resourceKeys.collections })
+      void queryClient.invalidateQueries({ queryKey: resourceKeys.overview })
+    },
+  })
+}
+
+export function useReplaceBookmark() {
+  const apiRequest = useApiClient()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: ReplaceBookmarkInput }) =>
+      apiRequest<Bookmark>(`/bookmarks/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(input),
+      }),
+    onSuccess: (bookmark) => {
+      queryClient.setQueryData(resourceKeys.bookmark(bookmark.id), bookmark)
       void queryClient.invalidateQueries({ queryKey: resourceKeys.bookmarks })
       void queryClient.invalidateQueries({ queryKey: resourceKeys.collections })
       void queryClient.invalidateQueries({ queryKey: resourceKeys.overview })

@@ -36,6 +36,13 @@ export interface CreateBookmarkInput {
   collectionId?: string | null
 }
 
+export interface ReplaceBookmarkInput {
+  url: string
+  title: string
+  notes: string | null
+  collectionId: string | null
+}
+
 export interface BookmarkFilters {
   page: number
   limit: number

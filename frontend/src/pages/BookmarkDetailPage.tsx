@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 import { Link, useNavigate, useParams } from 'react-router';
 import { ApiError } from '../api/apiClient';
 import { useBookmark, useDeleteBookmark } from '../api/resourceQueries';
+import { BookmarkFormDialog } from '../components/BookmarkFormDialog';
 import { DeleteConfirmationDialog } from '../components/DeleteConfirmationDialog';
 import { ResourceError, ResourceLoading } from '../components/ResourceStates';
 
@@ -15,6 +16,7 @@ export function BookmarkDetailPage() {
   const navigate = useNavigate();
   const bookmark = useBookmark(id);
   const deleteBookmark = useDeleteBookmark();
+  const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   if (bookmark.isPending) return <ResourceLoading label='Loading bookmark' />;
   if (bookmark.isError)
@@ -53,14 +55,23 @@ export function BookmarkDetailPage() {
           </Stack>
         </CardContent>
       </Card>
-      <Button
-        color='error'
-        variant='outlined'
-        className='self-start'
-        onClick={() => setDeleteOpen(true)}
-      >
-        Delete bookmark
-      </Button>
+      <Stack direction='row' spacing={1} className='self-start'>
+        <Button variant='contained' onClick={() => setEditOpen(true)}>
+          Edit bookmark
+        </Button>
+        <Button
+          color='error'
+          variant='outlined'
+          onClick={() => setDeleteOpen(true)}
+        >
+          Delete bookmark
+        </Button>
+      </Stack>
+      <BookmarkFormDialog
+        open={editOpen}
+        bookmark={bookmark.data}
+        onClose={() => setEditOpen(false)}
+      />
       <DeleteConfirmationDialog
         open={deleteOpen}
         title='Delete bookmark?'

@@ -13,6 +13,7 @@ import {
 import type { Bookmark } from '../api/resourceTypes';
 import { BookmarkFormDialog } from '../components/BookmarkFormDialog';
 import { BookmarkList } from '../components/BookmarkList';
+import { CollectionFormDialog } from '../components/CollectionFormDialog';
 import { DeleteConfirmationDialog } from '../components/DeleteConfirmationDialog';
 import { PaginationControls } from '../components/PaginationControls';
 import {
@@ -33,6 +34,7 @@ export function CollectionDetailPage() {
   const deleteCollection = useDeleteCollection();
   const deleteBookmark = useDeleteBookmark();
   const [createOpen, setCreateOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [bookmarkTarget, setBookmarkTarget] = useState<Bookmark | null>(null);
 
@@ -57,6 +59,9 @@ export function CollectionDetailPage() {
           </Typography>
         </div>
         <Stack direction='row' spacing={1}>
+          <Button variant='outlined' onClick={() => setEditOpen(true)}>
+            Edit collection
+          </Button>
           <Button variant='contained' onClick={() => setCreateOpen(true)}>
             New bookmark
           </Button>
@@ -100,6 +105,11 @@ export function CollectionDetailPage() {
         open={createOpen}
         initialCollectionId={id}
         onClose={() => setCreateOpen(false)}
+      />
+      <CollectionFormDialog
+        open={editOpen}
+        collection={collection.data}
+        onClose={() => setEditOpen(false)}
       />
       <DeleteConfirmationDialog
         open={deleteOpen}
