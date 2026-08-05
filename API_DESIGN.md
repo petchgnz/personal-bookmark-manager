@@ -136,7 +136,8 @@ List filters extend the same `page`/`limit` contract used by Collections:
 - `uncategorised=true` explicitly returns bookmarks whose `collectionId` is `null`.
 - The two filters are mutually exclusive. `uncategorised=false`, unknown filters, and invalid values return `400`.
 - Optional `search` is trimmed, must contain 1–200 characters, and performs PostgreSQL full-text search over title (weight A) and notes (weight B) using the English text configuration. It may be combined with either `collectionId` or `uncategorised=true`.
-- Search input uses `websearch_to_tsquery`: quoted phrases, `OR`, and leading `-` exclusion follow PostgreSQL web-search semantics; other punctuation is handled safely rather than being interpreted as SQL.
+- Plain letter/number search terms use PostgreSQL prefix matching, so a partial term such as `net` matches `Netflix`. Multiple plain terms retain AND semantics after English text normalization.
+- Advanced input uses `websearch_to_tsquery`: quoted phrases, `OR`, leading `-` exclusion, and punctuation retain PostgreSQL web-search semantics rather than being interpreted as SQL.
 - Search results are ordered by cover-density relevance, then `createdAt DESC, id DESC`; rows and totals remain paginated and owner-scoped.
 - The weighted GIN expression index is defined by the committed migration because Prisma schema DSL cannot represent this PostgreSQL expression index. Search SQL uses parameter-bound `Prisma.sql`; no unsafe raw query API or interpolated SQL string is used.
 

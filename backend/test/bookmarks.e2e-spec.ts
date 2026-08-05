@@ -268,6 +268,9 @@ describe('bookmarks (e2e)', () => {
     await createBookmark('bookmark-token-a', {
       title: 'Floating reference',
     });
+    await createBookmark('bookmark-token-a', {
+      title: 'Netflix',
+    });
     await createBookmark('bookmark-token-b', {
       title: 'Private Prisma handbook',
     });
@@ -300,6 +303,15 @@ describe('bookmarks (e2e)', () => {
     expect(
       (uncategorised.body as { data: BookmarkBody[] }).data[0]?.title,
     ).toBe('Floating reference');
+
+    const prefix = await request(app.getHttpServer())
+      .get('/bookmarks?search=net')
+      .set('Authorization', auth('bookmark-token-a'))
+      .expect(200);
+    expect(prefix.body).toMatchObject({ meta: { total: 1 } });
+    expect((prefix.body as { data: BookmarkBody[] }).data[0]?.title).toBe(
+      'Netflix',
+    );
 
     const injectionShaped = await request(app.getHttpServer())
       .get(`/bookmarks?search=${encodeURIComponent("' OR 1=1 --")}`)

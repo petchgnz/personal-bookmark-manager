@@ -106,7 +106,10 @@ export function BookmarksPage() {
             label='Search bookmarks'
             value={searchInput}
             className='grow'
-            slotProps={{ htmlInput: { maxLength: 200 } }}
+            slotProps={{
+              inputLabel: { shrink: true },
+              htmlInput: { maxLength: 200 },
+            }}
             onChange={(event) => setSearchInput(event.target.value)}
           />
           <Button type='submit' variant='outlined'>

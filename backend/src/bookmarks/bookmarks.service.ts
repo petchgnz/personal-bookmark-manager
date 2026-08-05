@@ -71,7 +71,10 @@ export class BookmarksService {
 
   async findAll(ownerId: string, query: BookmarkQueryDto) {
     if (query.search !== undefined) {
-      return this.findSearchPage(ownerId, query);
+      return this.findSearchPage(ownerId, {
+        ...query,
+        search: query.search,
+      });
     }
 
     const where: Prisma.BookmarkWhereInput = {
@@ -82,12 +85,29 @@ export class BookmarksService {
     return this.findPage(where, query);
   }
 
-  private async findSearchPage(ownerId: string, query: BookmarkQueryDto) {
+  private async findSearchPage(
+    ownerId: string,
+    query: BookmarkQueryDto & { search: string },
+  ) {
     const searchDocument = Prisma.sql`
       setweight(to_tsvector('english', COALESCE(b.title, '')), 'A') ||
       setweight(to_tsvector('english', COALESCE(b.notes, '')), 'B')
     `;
-    const searchQuery = Prisma.sql`websearch_to_tsquery('english', ${query.search})`;
+    const isSimpleSearch = /^[\p{L}\p{N}\s]+$/u.test(query.search);
+    const searchQuery = isSimpleSearch
+      ? Prisma.sql`to_tsquery(
+          'english',
+          COALESCE(
+            (
+              SELECT string_agg(quote_literal(term) || ':*', ' & ' ORDER BY term)
+              FROM unnest(
+                tsvector_to_array(to_tsvector('english', ${query.search}))
+              ) AS terms(term)
+            ),
+            quote_literal('__no_match__')
+          )
+        )`
+      : Prisma.sql`websearch_to_tsquery('english', ${query.search})`;
     const predicates = [
       Prisma.sql`b.owner_id = ${ownerId}::uuid`,
       Prisma.sql`${searchDocument} @@ ${searchQuery}`,

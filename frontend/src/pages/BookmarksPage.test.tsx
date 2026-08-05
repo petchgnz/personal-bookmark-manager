@@ -90,4 +90,17 @@ describe('BookmarksPage', () => {
       search: 'prisma docs',
     });
   });
+
+  it('keeps the empty search label clear of the field outline', () => {
+    render(
+      <MemoryRouter initialEntries={['/bookmarks']}>
+        <BookmarksPage />
+      </MemoryRouter>,
+    );
+
+    const searchInput = screen.getByLabelText(
+      'Search bookmarks',
+    ) as HTMLInputElement;
+    expect(searchInput.labels?.[0]).toHaveAttribute('data-shrink', 'true');
+  });
 });

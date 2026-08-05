@@ -81,9 +81,9 @@ The frontend supports bookmark list, detail, create, and confirmed delete flows,
 
 ## Full-Text Search Bonus
 
-The Bookmarks page supports PostgreSQL full-text search over bookmark titles and notes. Submit a 1–200 character query through the Search field; it can be combined with a collection or uncategorised filter and retains normal bounded pagination. Titles rank above notes, English word forms are stemmed, and ties use deterministic newest-first ordering.
+The Bookmarks page supports PostgreSQL full-text search over bookmark titles and notes. Submit a 1–200 character query through the Search field; it can be combined with a collection or uncategorised filter and retains normal bounded pagination. Plain words use prefix matching (`net` finds `Netflix`), titles rank above notes, English word forms are stemmed, and ties use deterministic newest-first ordering.
 
-The backend uses PostgreSQL `websearch_to_tsquery`, a weighted GIN expression index from the second migration, and parameter-bound Prisma raw SQL. Both result rows and totals are filtered by the authenticated internal owner ID. No search query, rank, or matching information from another user enters the response.
+The backend creates prefix `to_tsquery` terms for plain letter/number searches and retains PostgreSQL `websearch_to_tsquery` for advanced phrase, `OR`, exclusion, or punctuation input. It uses the weighted GIN expression index from the second migration and parameter-bound Prisma raw SQL. Both result rows and totals are filtered by the authenticated internal owner ID. No search query, rank, or matching information from another user enters the response.
 
 ## Verification
 
