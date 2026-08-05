@@ -235,13 +235,92 @@ describe('bookmarks (e2e)', () => {
     for (const path of [
       `/bookmarks?collectionId=${collection.id}&uncategorised=true`,
       '/bookmarks?uncategorised=false',
-      '/bookmarks?search=private',
+      '/bookmarks?search=%20%20%20',
+      `/bookmarks?search=${'x'.repeat(201)}`,
     ]) {
       await request(app.getHttpServer())
         .get(path)
         .set('Authorization', auth('bookmark-token-a'))
         .expect(400);
     }
+  });
+
+  it('searches title and notes with ranking, filters, pagination, and owner isolation', async () => {
+    const collection = await createCollection('bookmark-token-a', 'Search A');
+    const otherCollection = await createCollection(
+      'bookmark-token-a',
+      'Search other',
+    );
+    await createBookmark('bookmark-token-a', {
+      title: 'Prisma handbook',
+      notes: 'Database reference',
+      collectionId: collection.id,
+    });
+    await createBookmark('bookmark-token-a', {
+      title: 'Backend notes',
+      notes: 'A Prisma handbook for running services',
+      collectionId: collection.id,
+    });
+    await createBookmark('bookmark-token-a', {
+      title: 'Running production systems',
+      collectionId: otherCollection.id,
+    });
+    await createBookmark('bookmark-token-a', {
+      title: 'Floating reference',
+    });
+    await createBookmark('bookmark-token-a', {
+      title: 'Netflix',
+    });
+    await createBookmark('bookmark-token-b', {
+      title: 'Private Prisma handbook',
+    });
+
+    const ranked = await request(app.getHttpServer())
+      .get('/bookmarks?search=prisma%20handbook&page=1&limit=1')
+      .set('Authorization', auth('bookmark-token-a'))
+      .expect(200);
+    expect(ranked.body).toMatchObject({
+      meta: { page: 1, limit: 1, total: 2, totalPages: 2 },
+    });
+    expect((ranked.body as { data: BookmarkBody[] }).data[0]?.title).toBe(
+      'Prisma handbook',
+    );
+
+    const stemmedAndFiltered = await request(app.getHttpServer())
+      .get(`/bookmarks?search=run&collectionId=${otherCollection.id}`)
+      .set('Authorization', auth('bookmark-token-a'))
+      .expect(200);
+    expect(stemmedAndFiltered.body).toMatchObject({ meta: { total: 1 } });
+    expect(
+      (stemmedAndFiltered.body as { data: BookmarkBody[] }).data[0]?.title,
+    ).toBe('Running production systems');
+
+    const uncategorised = await request(app.getHttpServer())
+      .get('/bookmarks?search=floating&uncategorised=true')
+      .set('Authorization', auth('bookmark-token-a'))
+      .expect(200);
+    expect(uncategorised.body).toMatchObject({ meta: { total: 1 } });
+    expect(
+      (uncategorised.body as { data: BookmarkBody[] }).data[0]?.title,
+    ).toBe('Floating reference');
+
+    const prefix = await request(app.getHttpServer())
+      .get('/bookmarks?search=net')
+      .set('Authorization', auth('bookmark-token-a'))
+      .expect(200);
+    expect(prefix.body).toMatchObject({ meta: { total: 1 } });
+    expect((prefix.body as { data: BookmarkBody[] }).data[0]?.title).toBe(
+      'Netflix',
+    );
+
+    const injectionShaped = await request(app.getHttpServer())
+      .get(`/bookmarks?search=${encodeURIComponent("' OR 1=1 --")}`)
+      .set('Authorization', auth('bookmark-token-a'))
+      .expect(200);
+    expect(injectionShaped.body).toMatchObject({
+      data: [],
+      meta: { total: 0 },
+    });
   });
 
   it('protects single reads and mutations with indistinguishable 404 responses', async () => {

@@ -71,4 +71,40 @@ describe('BookmarksPage', () => {
       screen.getByText('There are no bookmarks matching this filter.'),
     ).toBeInTheDocument();
   });
+
+  it('submits trimmed search with the active filter and resets pagination', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={['/bookmarks?filter=collection-id&page=3']}>
+        <BookmarksPage />
+      </MemoryRouter>,
+    );
+
+    await user.type(screen.getByLabelText('Search bookmarks'), ' prisma docs ');
+    await user.click(screen.getByRole('button', { name: 'Search' }));
+
+    expect(vi.mocked(useBookmarks)).toHaveBeenLastCalledWith({
+      page: 1,
+      limit: 20,
+      collectionId: 'collection-id',
+      search: 'prisma docs',
+    });
+  });
+
+  it('presents search as the primary action without a floating label', () => {
+    render(
+      <MemoryRouter initialEntries={['/bookmarks']}>
+        <BookmarksPage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText('Find bookmarks')).toBeInTheDocument();
+    const searchInput = screen.getByLabelText('Search bookmarks');
+    expect(searchInput).toHaveAttribute(
+      'placeholder',
+      'Search by title or notes',
+    );
+    expect(searchInput.parentElement).toHaveClass('h-10');
+    expect(screen.getByRole('button', { name: 'Search' })).toHaveClass('h-10');
+  });
 });

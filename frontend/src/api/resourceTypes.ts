@@ -41,6 +41,7 @@ export interface BookmarkFilters {
   limit: number
   collectionId?: string
   uncategorised?: true
+  search?: string
 }
 
 export interface CollectionWithBookmarks extends Collection {

@@ -23,6 +23,7 @@ export function buildBookmarkQuery(filters: BookmarkFilters) {
   const params = new URLSearchParams({ page: String(filters.page), limit: String(filters.limit) })
   if (filters.collectionId) params.set('collectionId', filters.collectionId)
   if (filters.uncategorised) params.set('uncategorised', 'true')
+  if (filters.search) params.set('search', filters.search)
   return params.toString()
 }
 

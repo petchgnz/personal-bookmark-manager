@@ -119,4 +119,16 @@ describe('database invariants', () => {
       }),
     ).rejects.toMatchObject({ code: 'P2039' });
   });
+
+  it('has the weighted GIN full-text search index', async () => {
+    const indexes = await prisma.$queryRaw<
+      Array<{ indexdef: string }>
+    >`SELECT indexdef FROM pg_indexes WHERE indexname = 'bookmarks_search_vector_idx'`;
+
+    expect(indexes).toHaveLength(1);
+    expect(indexes[0]?.indexdef).toContain('USING gin');
+    expect(indexes[0]?.indexdef).toContain("to_tsvector('english'::regconfig");
+    expect(indexes[0]?.indexdef).toContain('\'A\'::"char"');
+    expect(indexes[0]?.indexdef).toContain('\'B\'::"char"');
+  });
 });

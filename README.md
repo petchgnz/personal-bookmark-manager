@@ -79,6 +79,12 @@ The frontend supports bookmark list, detail, create, and confirmed delete flows,
 
 `GET /all` and the protected `/all` frontend page show every owned collection with its bookmarks, retain empty collections, and display uncategorised bookmarks separately. The backend uses two owner-scoped reads in a transaction and groups results in memory, avoiding one query per collection. The page is read-only and links to the existing bookmark detail screens.
 
+## Full-Text Search Bonus
+
+The Bookmarks page supports PostgreSQL full-text search over bookmark titles and notes. Submit a 1–200 character query through the Search field; it can be combined with a collection or uncategorised filter and retains normal bounded pagination. Plain words use prefix matching (`net` finds `Netflix`), titles rank above notes, English word forms are stemmed, and ties use deterministic newest-first ordering.
+
+The backend creates prefix `to_tsquery` terms for plain letter/number searches and retains PostgreSQL `websearch_to_tsquery` for advanced phrase, `OR`, exclusion, or punctuation input. It uses the weighted GIN expression index from the second migration and parameter-bound Prisma raw SQL. Both result rows and totals are filtered by the authenticated internal owner ID. No search query, rank, or matching information from another user enters the response.
+
 ## Verification
 
 With the PostgreSQL container running and migrated:
@@ -145,10 +151,10 @@ Add `--volumes` only when intentionally deleting local PostgreSQL data.
 
 ## Completed and Deferred Scope
 
-Completed scope includes all required backend verbs, owner-scoped filters and nested routes, collection/bookmark list/detail/create/delete UI, pagination, destructive confirmations, real Auth0 login/callback/logout smoke testing, two-user privacy verification, the `/all` bonus overview, and production-style application Dockerfiles with a verified full-stack Compose profile.
+Completed scope includes all required backend verbs, owner-scoped filters and nested routes, collection/bookmark list/detail/create/delete UI, pagination, destructive confirmations, real Auth0 login/callback/logout smoke testing, two-user privacy verification, the `/all` bonus overview, production-style application Dockerfiles with a verified full-stack Compose profile, and owner-scoped PostgreSQL full-text search.
 
 Deferred by design:
 
 - Frontend PUT/PATCH edit screens. The fully tested backend endpoints remain available.
 - Sharing, because the assignment requires personal private resources; its design is recorded in `DECISIONS.md`.
-- PostgreSQL full-text search remains optional bonus work.
+- Frontend PUT/PATCH edit screens and sharing remain intentionally deferred as described above; all three planned bonus sessions are complete.
