@@ -13,7 +13,7 @@ transcripts/   Session logs and verification evidence
 
 ## Status
 
-The core assignment is implemented: npm workspaces, PostgreSQL persistence, the complete owner-scoped API, Auth0 PKCE frontend authentication, required collection/bookmark screens, adversarial privacy tests, and deterministic CI verification. Optional edit UI and bonus features remain intentionally deferred.
+The core assignment is implemented: npm workspaces, PostgreSQL persistence, the complete owner-scoped API, Auth0 PKCE frontend authentication, required collection/bookmark screens, adversarial privacy tests, and deterministic CI verification. Every optional bonus item in the brief is also implemented: CI, application Dockerfiles, `/all`, and full-text search. Only optional frontend edit UI and sharing remain intentionally deferred.
 
 ## Confidentiality
 
@@ -157,4 +157,5 @@ Deferred by design:
 
 - Frontend PUT/PATCH edit screens. The fully tested backend endpoints remain available.
 - Sharing, because the assignment requires personal private resources; its design is recorded in `DECISIONS.md`.
-- Frontend PUT/PATCH edit screens and sharing remain intentionally deferred as described above; all three planned bonus sessions are complete.
+
+The assignment explicitly requires PUT/PATCH for both backend resources, and those endpoints are implemented and tested. Its frontend section requires list, detail, create, delete, and bookmark filtering, but does not require edit screens; deferring that optional UI preserves the smaller, verifiable scope requested by the brief.

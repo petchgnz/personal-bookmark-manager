@@ -21,7 +21,7 @@ The gate includes:
 - Authenticated backend end-to-end tests.
 - Backend and frontend production builds.
 
-Latest local Session 13 result (2026-08-05): frontend 31 tests, backend unit 16 tests, PostgreSQL integration 4 tests, backend end-to-end 50 tests, format check, lint, strict TypeScript checks, and both production builds passed.
+Latest local Session 14 result (2026-08-05): frontend 32 tests, backend unit 16 tests, PostgreSQL integration 4 tests, backend end-to-end 50 tests, format check, lint, strict TypeScript checks, and both production builds passed.
 
 Authentication tests use controlled local signing keys and deterministic JWKS behavior. They cover valid Access Tokens, missing/malformed credentials, invalid signatures and key IDs, disallowed algorithms, incorrect issuer/audience, ID Token rejection, temporal claims, missing/empty subject claims, and malformed tokens.
 
@@ -68,7 +68,7 @@ No credentials, raw tokens, cookies, or screenshots containing authentication ma
 ## Migration, Seed, and CI
 
 - `prisma validate` confirms the schema is valid.
-- `prisma migrate status` confirms the local database is up to date with the one committed migration.
+- `prisma migrate status` confirms the local database is up to date with both committed migrations.
 - The deterministic seed uses stable IDs and upserts two distinct users, their private collections/bookmarks, and an uncategorised bookmark.
 - The seed completed successfully twice in succession during Session 10, proving the fixture process is repeatable against the current local database.
 - GitHub Actions provisions a fresh PostgreSQL 17 service, generates the ignored Prisma Client output, applies the committed migration, runs the seed, and executes the repository gate.
@@ -86,7 +86,17 @@ The first GitHub-hosted run exposed a clean-runner ordering gap: the seed import
 
 - Frontend PUT/PATCH edit screens are optional and deferred; backend PUT/PATCH behavior is implemented and tested.
 - Sharing is intentionally not implemented because it conflicts with the private personal-resource requirement.
-- Frontend PUT/PATCH edit screens remain optional and deferred; sharing remains intentionally excluded by the private-resource decision. Planned bonus scope is implemented.
+- The frontend requirement explicitly names list, detail, create, delete, and bookmark filtering; it does not require edit screens. Planned bonus scope is implemented.
+
+## Session 14 Final Submission Audit
+
+- The source PDF was re-read and pages 5-8 were visually inspected. PUT and PATCH are explicit backend requirements for both resources; frontend edit screens are not listed in the required website flows.
+- All required tracked artifacts exist: backend, frontend, agent rules, three reusable `.agent` workflows, API/decision/workflow documents, README, automated tests, and real session transcripts.
+- Confidential `documents/`, local `ASSIGNMENT.md`, `tmp/`, environment files, generated Prisma Client, dependencies, and build output are ignored. A tracked-file scan found no assignment PDF, rendered page, local environment file, JWT-shaped token, private-key header, or Client Secret assignment.
+- The first verification attempt correctly failed because Docker was open but the repository PostgreSQL service was stopped. Starting only the existing `postgres` service without deleting its volume restored the environment.
+- Prisma validation passed; both committed migrations are current; deterministic seed passed; the complete repository gate then passed with the counts recorded above.
+- The full Compose profile validated, rebuilt, and started. PostgreSQL, backend, and frontend became healthy; migration exited successfully.
+- Container smoke checks returned frontend health/deep-link/runtime-config `200`, backend unauthenticated `401`, trusted CORS preflight `204` with the configured origin, and no allow-origin header for an untrusted origin. Runtime public values were substituted and served with `Cache-Control: no-store`.
 
 ## Session 13 Full-Text Search Verification
 
