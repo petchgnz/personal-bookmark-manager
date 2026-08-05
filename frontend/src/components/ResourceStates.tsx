@@ -17,6 +17,12 @@ export function ResourceError({ onRetry }: { onRetry: () => void }) {
   return (
     <Alert
       severity='error'
+      sx={{
+        alignItems: 'center',
+        '& .MuiAlert-action': {
+          paddingTop: 0,
+        },
+      }}
       action={
         <Button color='inherit' onClick={onRetry}>
           Try again

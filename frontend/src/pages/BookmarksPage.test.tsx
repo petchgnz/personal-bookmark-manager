@@ -99,9 +99,12 @@ describe('BookmarksPage', () => {
     );
 
     expect(screen.getByText('Find bookmarks')).toBeInTheDocument();
-    expect(screen.getByLabelText('Search bookmarks')).toHaveAttribute(
+    const searchInput = screen.getByLabelText('Search bookmarks');
+    expect(searchInput).toHaveAttribute(
       'placeholder',
       'Search by title or notes',
     );
+    expect(searchInput.parentElement).toHaveClass('h-10');
+    expect(screen.getByRole('button', { name: 'Search' })).toHaveClass('h-10');
   });
 });

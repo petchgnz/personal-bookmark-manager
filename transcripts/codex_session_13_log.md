@@ -21,6 +21,7 @@
 1. Confirmed the full Compose application worked, Session 12 was merged into `dev`, and requested the next session.
 2. Reported that search worked generally, but `net` did not find `Netflix`, and the Search field label overlapped its outline; requested both fixes.
 3. Confirmed both fixes worked, then requested a more modern and easier-to-use arrangement for the search/filter toolbar based on a manual UI review.
+4. Requested equal Search field/button heights and authorized staging the user's `ResourceStates.tsx` error-layout adjustment with the completed fix.
 
 ### Material actions and commands
 
@@ -36,6 +37,7 @@
 10. Reproduced the partial-word limitation and changed plain searches to safe PostgreSQL prefix terms while retaining advanced web-search parsing.
 11. Applied the established explicit MUI input-label shrink contract to the Search field and added regression coverage for the label state.
 12. Reworked the flat toolbar into a responsive panel with clear instructions, primary Search action, secondary Collection filter, conditional Clear action, and mobile stacking.
+13. Set the Search field, Search button, and conditional Clear button to the same explicit 40px height, added a regression assertion, reviewed the user-owned error-state alignment diff, and included it unchanged apart from Prettier formatting.
 
 ## 3. Code/Logic Created or Modified
 

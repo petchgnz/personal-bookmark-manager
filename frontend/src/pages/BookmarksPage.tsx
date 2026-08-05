@@ -112,20 +112,23 @@ export function BookmarksPage() {
                   value={searchInput}
                   size='small'
                   className='grow'
-                  slotProps={{ htmlInput: { maxLength: 200 } }}
+                  slotProps={{
+                    input: { className: 'h-10' },
+                    htmlInput: { maxLength: 200 },
+                  }}
                   onChange={(event) => setSearchInput(event.target.value)}
                 />
                 <Button
                   type='submit'
                   variant='contained'
-                  className='shrink-0 sm:min-w-28'
+                  className='h-10 shrink-0 sm:min-w-28'
                 >
                   Search
                 </Button>
                 {search && (
                   <Button
                     variant='text'
-                    className='shrink-0'
+                    className='h-10 shrink-0'
                     onClick={() => {
                       setSearchInput('');
                       const next = new URLSearchParams(searchParams);
