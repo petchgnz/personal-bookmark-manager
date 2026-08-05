@@ -153,3 +153,13 @@ Decision: use `$queryRaw` with `Prisma.sql` fragments and value binding for this
 Reason: this provides stemming, phrase/web syntax, relevance ordering, and an indexable query while retaining the privacy and pagination contract. Title weighting produces more useful ranking than treating long notes and concise titles equally.
 
 Follow-up: manual acceptance testing showed that exact lexeme matching made `net` fail to find `Netflix`. Prefix behavior is limited to plain input so it improves incremental search without changing quoted phrase, `OR`, exclusion, or punctuation semantics. PostgreSQL derives the normalized lexemes and all user values remain bound parameters.
+
+## Agent Steering Evidence
+
+The decisions above were translated into explicit guardrails rather than left to framework defaults:
+
+- The agent was directed away from accepting whichever OIDC token decoded successfully. `AGENTS.md`, exact issuer/API-audience/RS256 verification, and negative ID-token tests enforce the chosen Access Token boundary.
+- The agent was directed away from a typical cascade-delete or speculative sharing model. The schema uses `SET NULL`, relation ownership is enforced in application queries and database constraints, and sharing is documented but intentionally absent.
+- The agent was directed away from generic partial-update helpers. Separate PUT/PATCH DTOs, explicit omitted-versus-null semantics, rejected system fields, and two-user mutation tests encode the contract.
+
+These constraints were reviewed through the reusable `.agent/security-review.md` and `.agent/verify-privacy.md` workflows whenever endpoints or persistence behavior changed.

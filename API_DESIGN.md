@@ -150,6 +150,16 @@ For the nested route, a missing or cross-owner collection returns the identical 
 - Email and display name are nullable profile data and are not identity keys.
 - User deletion is outside the current API scope; required ownership foreign keys use `RESTRICT` to prevent accidental data loss.
 
+## Agent Corrections Proven During Review
+
+These are concrete places where the first agent-produced approach was plausible but wrong, and verification changed the design:
+
+1. **PATCH null handling:** the initial Collection DTO used `@IsOptional()`, which also skipped validation for explicit `null`. A PostgreSQL-backed request test reached persistence instead of returning the documented `400`. The DTO now skips validation only for `undefined`; Bookmark PATCH reuses that rule while deliberately allowing `null` only for `notes` and `collectionId`.
+2. **Relation defense in depth:** the first database test assumed Prisma error `P2004` for the same-owner CHECK violation. The live PostgreSQL adapter returned `P2039`. The assertion was corrected to observed adapter behavior without weakening the invariant or its two-user API tests.
+3. **Clean CI generation order:** the initial hosted pipeline seeded a fresh checkout before generating the ignored Prisma Client, causing `MODULE_NOT_FOUND`. CI now runs the existing `prisma:generate` script before migration and seed, proving the repository works without committing generated output.
+
+The corresponding failures, commands, and recovery steps remain in the session transcripts and `AI_WORKFLOW.md`; they are not reconstructed as flawless first attempts.
+
 ## Collection and Bookmark Relation
 
 - A bookmark may be uncategorised.
