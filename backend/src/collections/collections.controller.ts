@@ -17,7 +17,7 @@ import { CurrentUserIdentity } from '../auth/current-user.decorator';
 import type { CurrentUser } from '../auth/auth.types';
 import { CollectionsService } from './collections.service';
 import { CollectionNameDto } from './dto/collection-name.dto';
-import { PaginationQueryDto } from './dto/pagination-query.dto';
+import { CollectionQueryDto } from './dto/collection-query.dto';
 import { UpdateCollectionDto } from './dto/update-collection.dto';
 
 @Controller('collections')
@@ -35,7 +35,7 @@ export class CollectionsController {
   @Get()
   findAll(
     @CurrentUserIdentity() user: CurrentUser,
-    @Query() query: PaginationQueryDto,
+    @Query() query: CollectionQueryDto,
   ) {
     return this.collectionsService.findAll(user.id, query);
   }

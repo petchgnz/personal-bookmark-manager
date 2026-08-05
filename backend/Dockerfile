@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:22.22.0-alpine AS dependencies
+FROM node:22.22.2-alpine AS dependencies
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY backend/package.json backend/package.json
@@ -14,14 +14,14 @@ RUN npm run build --workspace=backend
 FROM build AS migration
 CMD ["npm", "run", "prisma:migrate:deploy", "--workspace=backend"]
 
-FROM node:22.22.0-alpine AS production-dependencies
+FROM node:22.22.2-alpine AS production-dependencies
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY backend/package.json backend/package.json
 COPY frontend/package.json frontend/package.json
 RUN npm ci --omit=dev --workspace=backend
 
-FROM node:22.22.0-alpine AS runtime
+FROM node:22.22.2-alpine AS runtime
 ENV NODE_ENV=production \
     PORT=3001
 WORKDIR /app
