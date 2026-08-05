@@ -1,122 +1,97 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { lazy, Suspense } from 'react';
+import { Navigate, Route, Routes } from 'react-router';
+import { AppShell } from './components/AppShell';
+import { LoadingState } from './components/LoadingState';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { CallbackPage } from './pages/CallbackPage';
+import { LoginPage } from './pages/LoginPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 
-function App() {
-  const [count, setCount] = useState(0)
+const CollectionsPage = lazy(() =>
+  import('./pages/CollectionsPage').then((module) => ({
+    default: module.CollectionsPage,
+  })),
+);
+const CollectionDetailPage = lazy(() =>
+  import('./pages/CollectionDetailPage').then((module) => ({
+    default: module.CollectionDetailPage,
+  })),
+);
+const BookmarksPage = lazy(() =>
+  import('./pages/BookmarksPage').then((module) => ({
+    default: module.BookmarksPage,
+  })),
+);
+const BookmarkDetailPage = lazy(() =>
+  import('./pages/BookmarkDetailPage').then((module) => ({
+    default: module.BookmarkDetailPage,
+  })),
+);
+const AllBookmarksPage = lazy(() =>
+  import('./pages/AllBookmarksPage').then((module) => ({
+    default: module.AllBookmarksPage,
+  })),
+);
 
+export function App() {
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <Routes>
+      <Route path='/login' element={<LoginPage />} />
+      <Route path='/callback' element={<CallbackPage />} />
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppShell />}>
+          <Route index element={<Navigate to='/collections' replace />} />
+          <Route
+            path='/collections'
+            element={
+              <Suspense
+                fallback={<LoadingState message='Loading collections…' />}
+              >
+                <CollectionsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path='/collections/:id'
+            element={
+              <Suspense
+                fallback={<LoadingState message='Loading collection…' />}
+              >
+                <CollectionDetailPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path='/bookmarks'
+            element={
+              <Suspense
+                fallback={<LoadingState message='Loading bookmarks…' />}
+              >
+                <BookmarksPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path='/all'
+            element={
+              <Suspense
+                fallback={<LoadingState message='Loading all bookmarks…' />}
+              >
+                <AllBookmarksPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path='/bookmarks/:id'
+            element={
+              <Suspense fallback={<LoadingState message='Loading bookmark…' />}>
+                <BookmarkDetailPage />
+              </Suspense>
+            }
+          />
+        </Route>
+      </Route>
+      <Route path='*' element={<NotFoundPage />} />
+    </Routes>
+  );
 }
-
-export default App

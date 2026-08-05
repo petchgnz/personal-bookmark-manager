@@ -15,3 +15,12 @@ dist/
 backend/dist/
 frontend/dist/
 *.tsbuildinfo
+
+# Local environment files
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# Generated Prisma client
+backend/src/generated/prisma/

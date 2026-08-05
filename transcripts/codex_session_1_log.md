@@ -7,7 +7,7 @@
 - Agent: Rex
 - Starting commit: unavailable; repository had no commits
 - Ending commit: pending first repository commit
-- Tools: Codex conversation, PDF text extraction and rendering, web documentation lookup, shell inspection, apply_patch
+- Tools: Codex conversation, assignment text extraction and rendering, web documentation lookup, shell inspection, apply_patch
 - Redactions: Auth0 test-user password and confidential source-document reproduction are intentionally omitted
 
 ## 1. Goal / Task
@@ -28,8 +28,8 @@ The user prompts progressed in this order:
 
 Material agent actions:
 
-- Inspected the repository and found the confidential eight-page assignment PDF.
-- Extracted the complete PDF text and visually reviewed rendered pages to preserve tables and layout-dependent requirements.
+- Inspected the repository and found the confidential eight-page assignment.
+- Extracted the complete assignment text and visually reviewed rendered pages to preserve tables and layout-dependent requirements.
 - Identified that only 10/100 rubric points concern the running application; the remaining points emphasize agent setup, API/data engineering, verification, ambiguity resolution, and process evidence.
 - Compared design options and recorded the user's decisions.
 - Consulted current official npm, Auth0, NestJS, OpenID Connect, and TanStack Query documentation where decisions depended on current behavior.
@@ -63,9 +63,9 @@ Files created during the planning handoff:
 ## 4. Errors and Debugging Steps
 
 - Initial sandboxed PowerShell processes intermittently failed with Windows access-denied errors. Commands were rerun with narrowly scoped approved execution.
-- PDF text extraction stopped at page 6 because the default Windows output encoding could not represent a Unicode character. The remaining pages were extracted with Python UTF-8 mode.
+- Assignment text extraction stopped at page 6 because the default Windows output encoding could not represent a Unicode character. The remaining pages were extracted with Python UTF-8 mode.
 - The initially assumed Poppler binary path was incorrect. The bundled runtime was inspected, the real executable path was found, and all pages were rendered successfully.
-- The public-repository requirement conflicted with the source PDF's CONFIDENTIAL marking. The source PDF, rendered pages, temporary artifacts, and detailed local `ASSIGNMENT.md` were excluded from Git. `AGENTS.md` remains tracked because it is a graded agent-rules deliverable.
+- The public-repository requirement conflicted with the source assignment's CONFIDENTIAL marking. The source assignment, rendered pages, temporary artifacts, and detailed local `ASSIGNMENT.md` were excluded from Git. `AGENTS.md` remains tracked because it is a graded agent-rules deliverable.
 - The user requested Tailwind CSS while the assignment requires MUI. The resolution was to retain MUI as the component system and use Tailwind only for focused layout, spacing, and responsive utilities.
 
 ## 5. Final Output

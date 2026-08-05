@@ -10,10 +10,14 @@
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "build": "npm run build --workspaces --if-present"
+    "test:db": "npm run test:db --workspace=backend",
+    "test:e2e": "npm run test:e2e --workspace=backend",
+    "build": "npm run build --workspaces --if-present",
+    "format:check": "npm run format:check --workspace=frontend",
+    "verify": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run test:db && npm run test:e2e && npm run build"
   },
   "engines": {
-    "node": ">=22.22.0",
+    "node": ">=22.22.2 <23",
     "npm": ">=10.0.0"
   }
 }

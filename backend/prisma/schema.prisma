@@ -1,0 +1,58 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id              String       @id @default(uuid()) @db.Uuid
+  externalIssuer  String       @map("external_issuer") @db.VarChar(512)
+  externalSubject String       @map("external_subject") @db.VarChar(255)
+  email           String?      @db.VarChar(320)
+  displayName     String?      @map("display_name") @db.VarChar(200)
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+  collections     Collection[]
+  bookmarks       Bookmark[]
+
+  @@unique([externalIssuer, externalSubject])
+  @@map("users")
+}
+
+model Collection {
+  id        String     @id @default(uuid()) @db.Uuid
+  name      String     @db.VarChar(120)
+  ownerId   String     @map("owner_id") @db.Uuid
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  owner     User       @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  bookmarks Bookmark[]
+
+  // Supports the composite bookmark-to-collection ownership foreign key.
+  @@unique([id, ownerId])
+  @@index([ownerId, createdAt])
+  @@map("collections")
+}
+
+model Bookmark {
+  id                String      @id @default(uuid()) @db.Uuid
+  url               String      @db.VarChar(2048)
+  title             String      @db.VarChar(300)
+  notes             String?     @db.Text
+  collectionId      String?     @map("collection_id") @db.Uuid
+  collectionOwnerId String?     @map("collection_owner_id") @db.Uuid
+  ownerId           String      @map("owner_id") @db.Uuid
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+  owner             User        @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  collection        Collection? @relation(fields: [collectionId, collectionOwnerId], references: [id, ownerId], onDelete: SetNull)
+
+  @@index([ownerId, createdAt])
+  @@index([ownerId, collectionId, createdAt])
+  @@index([collectionId, collectionOwnerId])
+  @@map("bookmarks")
+}
