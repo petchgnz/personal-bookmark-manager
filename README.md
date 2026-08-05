@@ -75,6 +75,10 @@ Authenticated clients can manage bookmarks under `/bookmarks`, filter by `collec
 
 The frontend supports bookmark list, detail, create, and confirmed delete flows, plus collection and uncategorised filters. External links open in a separate browsing context with `noopener noreferrer` protection.
 
+## All Bookmarks Bonus
+
+`GET /all` and the protected `/all` frontend page show every owned collection with its bookmarks, retain empty collections, and display uncategorised bookmarks separately. The backend uses two owner-scoped reads in a transaction and groups results in memory, avoiding one query per collection. The page is read-only and links to the existing bookmark detail screens.
+
 ## Verification
 
 With the PostgreSQL container running and migrated:
@@ -91,14 +95,14 @@ See `VERIFICATION.md` for the security review, two-user privacy matrix, real Aut
 
 ## Continuous Integration
 
-GitHub Actions runs on pushes to `main`/`dev` and on pull requests. Each run installs the committed lockfile with `npm ci`, starts an isolated PostgreSQL 17 service, applies the committed migration, runs the deterministic seed, and executes `npm run verify`. CI does not use real Auth0 credentials; token-validation tests use controlled local keys.
+GitHub Actions runs on pushes to `main`/`dev` and on pull requests. Each run installs the committed lockfile with `npm ci`, starts an isolated PostgreSQL 17 service, generates Prisma Client, applies the committed migration, runs the deterministic seed, and executes `npm run verify`. CI does not use real Auth0 credentials; token-validation tests use controlled local keys.
 
 ## Completed and Deferred Scope
 
-Completed core scope includes all required backend verbs, owner-scoped filters and nested routes, collection/bookmark list/detail/create/delete UI, pagination, destructive confirmations, real Auth0 login/callback/logout smoke testing, and two-user privacy verification.
+Completed scope includes all required backend verbs, owner-scoped filters and nested routes, collection/bookmark list/detail/create/delete UI, pagination, destructive confirmations, real Auth0 login/callback/logout smoke testing, two-user privacy verification, and the `/all` bonus overview.
 
 Deferred by design:
 
 - Frontend PUT/PATCH edit screens. The fully tested backend endpoints remain available.
 - Sharing, because the assignment requires personal private resources; its design is recorded in `DECISIONS.md`.
-- `/all`, application Dockerfiles, and PostgreSQL full-text search until the core quality gate is confirmed.
+- Application Dockerfiles and PostgreSQL full-text search remain optional bonus work.

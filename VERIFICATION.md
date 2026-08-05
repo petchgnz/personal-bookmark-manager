@@ -21,7 +21,7 @@ The gate includes:
 - Authenticated backend end-to-end tests.
 - Backend and frontend production builds.
 
-Latest local Session 10 result (2026-08-05): frontend 26 tests, backend unit 16 tests, PostgreSQL integration 3 tests, backend end-to-end 46 tests, format check, lint, strict TypeScript checks, and both production builds passed.
+Latest local Session 11 result (2026-08-05): frontend 28 tests, backend unit 16 tests, PostgreSQL integration 3 tests, backend end-to-end 49 tests, format check, lint, strict TypeScript checks, and both production builds passed.
 
 Authentication tests use controlled local signing keys and deterministic JWKS behavior. They cover valid Access Tokens, missing/malformed credentials, invalid signatures and key IDs, disallowed algorithms, incorrect issuer/audience, ID Token rejection, temporal claims, missing/empty subject claims, and malformed tokens.
 
@@ -73,10 +73,17 @@ No credentials, raw tokens, cookies, or screenshots containing authentication ma
 - The seed completed successfully twice in succession during Session 10, proving the fixture process is repeatable against the current local database.
 - GitHub Actions provisions a fresh PostgreSQL 17 service, generates the ignored Prisma Client output, applies the committed migration, runs the seed, and executes the repository gate.
 
-The first GitHub-hosted run exposed a clean-runner ordering gap: the seed imported the ignored generated Prisma Client before any generation step had run. The workflow now generates the client explicitly before migration and seed. The corrected workflow syntax and repository gate are verified locally, but the corrected GitHub-hosted run remains external evidence and must not be described as passing until the branch is pushed and the check completes successfully.
+The first GitHub-hosted run exposed a clean-runner ordering gap: the seed imported the ignored generated Prisma Client before any generation step had run. The workflow now generates the client explicitly before migration and seed. The user confirmed the corrected GitHub-hosted CI run passed on 2026-08-05.
+
+## Session 11 `/all` Privacy Verification
+
+- `GET /all` remains covered by the global authentication route inventory.
+- Two-user PostgreSQL e2e coverage proves the response contains only the current owner's collections, categorised bookmarks, and uncategorised bookmarks, while retaining owned empty collections.
+- The implementation performs two owner-scoped reads in one transaction and groups in memory, so it introduces no per-collection N+1 query pattern.
+- The response exposes no new internal relation fields, secrets, error detail, or cross-owner counts.
 
 ## Deferred Scope
 
 - Frontend PUT/PATCH edit screens are optional and deferred; backend PUT/PATCH behavior is implemented and tested.
 - Sharing is intentionally not implemented because it conflicts with the private personal-resource requirement.
-- Bonus `/all`, application Dockerfiles, and full-text search remain blocked until the core gate, including hosted CI, is confirmed.
+- Application Dockerfiles and full-text search remain optional bonus scope.

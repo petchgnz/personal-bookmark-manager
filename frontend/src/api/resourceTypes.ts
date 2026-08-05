@@ -42,3 +42,12 @@ export interface BookmarkFilters {
   collectionId?: string
   uncategorised?: true
 }
+
+export interface CollectionWithBookmarks extends Collection {
+  bookmarks: Bookmark[]
+}
+
+export interface BookmarkOverview {
+  collections: CollectionWithBookmarks[]
+  uncategorisedBookmarks: Bookmark[]
+}

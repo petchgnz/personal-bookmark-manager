@@ -29,6 +29,9 @@ export function AppShell() {
             <Button component={NavLink} to='/bookmarks'>
               Bookmarks
             </Button>
+            <Button component={NavLink} to='/all'>
+              All
+            </Button>
             <Button
               variant='outlined'
               onClick={() =>

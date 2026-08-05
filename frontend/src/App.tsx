@@ -27,6 +27,11 @@ const BookmarkDetailPage = lazy(() =>
     default: module.BookmarkDetailPage,
   })),
 );
+const AllBookmarksPage = lazy(() =>
+  import('./pages/AllBookmarksPage').then((module) => ({
+    default: module.AllBookmarksPage,
+  })),
+);
 
 export function App() {
   return (
@@ -63,6 +68,16 @@ export function App() {
                 fallback={<LoadingState message='Loading bookmarks…' />}
               >
                 <BookmarksPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path='/all'
+            element={
+              <Suspense
+                fallback={<LoadingState message='Loading all bookmarks…' />}
+              >
+                <AllBookmarksPage />
               </Suspense>
             }
           />

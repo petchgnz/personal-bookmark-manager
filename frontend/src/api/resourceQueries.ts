@@ -1,12 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApiClient } from './useApiClient'
-import type { Bookmark, BookmarkFilters, Collection, CreateBookmarkInput, PaginatedResponse } from './resourceTypes'
+import type { Bookmark, BookmarkFilters, BookmarkOverview, Collection, CreateBookmarkInput, PaginatedResponse } from './resourceTypes'
 
 export const resourceKeys = {
   collections: ['collections'] as const,
   collection: (id: string) => ['collections', id] as const,
   bookmarks: ['bookmarks'] as const,
   bookmark: (id: string) => ['bookmarks', id] as const,
+  overview: ['overview'] as const,
+}
+
+export function useBookmarkOverview() {
+  const apiRequest = useApiClient()
+  return useQuery({ queryKey: resourceKeys.overview, queryFn: () => apiRequest<BookmarkOverview>('/all') })
 }
 
 export function buildPageQuery(page: number, limit: number) {
@@ -38,7 +44,10 @@ export function useCreateCollection() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (name: string) => apiRequest<Collection>('/collections', { method: 'POST', body: JSON.stringify({ name }) }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: resourceKeys.collections }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: resourceKeys.collections })
+      void queryClient.invalidateQueries({ queryKey: resourceKeys.overview })
+    },
   })
 }
 
@@ -50,6 +59,7 @@ export function useDeleteCollection() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: resourceKeys.collections })
       void queryClient.invalidateQueries({ queryKey: resourceKeys.bookmarks })
+      void queryClient.invalidateQueries({ queryKey: resourceKeys.overview })
     },
   })
 }
@@ -83,6 +93,7 @@ export function useCreateBookmark() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: resourceKeys.bookmarks })
       void queryClient.invalidateQueries({ queryKey: resourceKeys.collections })
+      void queryClient.invalidateQueries({ queryKey: resourceKeys.overview })
     },
   })
 }
@@ -95,6 +106,7 @@ export function useDeleteBookmark() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: resourceKeys.bookmarks })
       void queryClient.invalidateQueries({ queryKey: resourceKeys.collections })
+      void queryClient.invalidateQueries({ queryKey: resourceKeys.overview })
     },
   })
 }
