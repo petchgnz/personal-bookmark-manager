@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
+import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -80,56 +81,84 @@ export function BookmarksPage() {
           New bookmark
         </Button>
       </Stack>
-      <Stack direction='row' className='flex-wrap items-start gap-3'>
-        <TextField
-          select
-          label='Filter'
-          value={filter}
-          className='min-w-64'
-          onChange={(event) => setFilter(event.target.value)}
-        >
-          <MenuItem value='all'>All bookmarks</MenuItem>
-          <MenuItem value='uncategorised'>Uncategorised</MenuItem>
-          {collections.data?.data.map((collection) => (
-            <MenuItem key={collection.id} value={collection.id}>
-              {collection.name}
-            </MenuItem>
-          ))}
-        </TextField>
-        <Stack
-          component='form'
-          direction='row'
-          className='min-w-72 grow gap-2'
-          onSubmit={submitSearch}
-        >
-          <TextField
-            label='Search bookmarks'
-            value={searchInput}
-            className='grow'
-            slotProps={{
-              inputLabel: { shrink: true },
-              htmlInput: { maxLength: 200 },
-            }}
-            onChange={(event) => setSearchInput(event.target.value)}
-          />
-          <Button type='submit' variant='outlined'>
-            Search
-          </Button>
-          {search && (
-            <Button
-              onClick={() => {
-                setSearchInput('');
-                const next = new URLSearchParams(searchParams);
-                next.delete('search');
-                next.delete('page');
-                setSearchParams(next);
-              }}
+      <Paper
+        component='section'
+        variant='outlined'
+        className='rounded-2xl border-slate-200 bg-white p-4 shadow-sm md:p-5'
+      >
+        <Stack spacing={2}>
+          <div>
+            <Typography variant='subtitle1' className='font-semibold'>
+              Find bookmarks
+            </Typography>
+            <Typography variant='body2' color='text.secondary'>
+              Search titles and notes, then narrow the results by collection.
+            </Typography>
+          </div>
+          <div className='grid gap-4 lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-end'>
+            <Stack component='form' spacing={1} onSubmit={submitSearch}>
+              <Typography
+                component='label'
+                htmlFor='bookmark-search'
+                variant='body2'
+                className='font-medium text-slate-700'
+              >
+                Search bookmarks
+              </Typography>
+              <div className='flex flex-col gap-2 sm:flex-row'>
+                <TextField
+                  id='bookmark-search'
+                  placeholder='Search by title or notes'
+                  value={searchInput}
+                  size='small'
+                  className='grow'
+                  slotProps={{ htmlInput: { maxLength: 200 } }}
+                  onChange={(event) => setSearchInput(event.target.value)}
+                />
+                <Button
+                  type='submit'
+                  variant='contained'
+                  className='shrink-0 sm:min-w-28'
+                >
+                  Search
+                </Button>
+                {search && (
+                  <Button
+                    variant='text'
+                    className='shrink-0'
+                    onClick={() => {
+                      setSearchInput('');
+                      const next = new URLSearchParams(searchParams);
+                      next.delete('search');
+                      next.delete('page');
+                      setSearchParams(next);
+                    }}
+                  >
+                    Clear
+                  </Button>
+                )}
+              </div>
+            </Stack>
+            <TextField
+              select
+              label='Filter'
+              value={filter}
+              size='small'
+              fullWidth
+              slotProps={{ inputLabel: { shrink: true } }}
+              onChange={(event) => setFilter(event.target.value)}
             >
-              Clear
-            </Button>
-          )}
+              <MenuItem value='all'>All bookmarks</MenuItem>
+              <MenuItem value='uncategorised'>Uncategorised</MenuItem>
+              {collections.data?.data.map((collection) => (
+                <MenuItem key={collection.id} value={collection.id}>
+                  {collection.name}
+                </MenuItem>
+              ))}
+            </TextField>
+          </div>
         </Stack>
-      </Stack>
+      </Paper>
       {bookmarks.isPending && <ResourceLoading label='Loading bookmarks' />}
       {bookmarks.isError && (
         <ResourceError onRetry={() => void bookmarks.refetch()} />

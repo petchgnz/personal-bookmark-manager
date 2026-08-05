@@ -91,16 +91,17 @@ describe('BookmarksPage', () => {
     });
   });
 
-  it('keeps the empty search label clear of the field outline', () => {
+  it('presents search as the primary action without a floating label', () => {
     render(
       <MemoryRouter initialEntries={['/bookmarks']}>
         <BookmarksPage />
       </MemoryRouter>,
     );
 
-    const searchInput = screen.getByLabelText(
-      'Search bookmarks',
-    ) as HTMLInputElement;
-    expect(searchInput.labels?.[0]).toHaveAttribute('data-shrink', 'true');
+    expect(screen.getByText('Find bookmarks')).toBeInTheDocument();
+    expect(screen.getByLabelText('Search bookmarks')).toHaveAttribute(
+      'placeholder',
+      'Search by title or notes',
+    );
   });
 });

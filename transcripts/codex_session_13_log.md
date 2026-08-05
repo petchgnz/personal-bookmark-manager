@@ -20,6 +20,7 @@
 
 1. Confirmed the full Compose application worked, Session 12 was merged into `dev`, and requested the next session.
 2. Reported that search worked generally, but `net` did not find `Netflix`, and the Search field label overlapped its outline; requested both fixes.
+3. Confirmed both fixes worked, then requested a more modern and easier-to-use arrangement for the search/filter toolbar based on a manual UI review.
 
 ### Material actions and commands
 
@@ -34,6 +35,7 @@
 9. Updated API, setup, decisions, workflow evidence, verification, and this transcript.
 10. Reproduced the partial-word limitation and changed plain searches to safe PostgreSQL prefix terms while retaining advanced web-search parsing.
 11. Applied the established explicit MUI input-label shrink contract to the Search field and added regression coverage for the label state.
+12. Reworked the flat toolbar into a responsive panel with clear instructions, primary Search action, secondary Collection filter, conditional Clear action, and mobile stacking.
 
 ## 3. Code/Logic Created or Modified
 
@@ -41,6 +43,7 @@
 - PostgreSQL indexes `title` at weight A and `notes` at weight B using the English configuration.
 - Plain letter/number searches use prefix `to_tsquery` terms derived inside PostgreSQL; advanced syntax uses `websearch_to_tsquery`. Both paths retain `ts_rank_cd`, deterministic tie-breaking, and prepared value binding via `Prisma.sql`.
 - The frontend stores submitted search in the URL, resets pagination on search/filter changes, and exposes explicit Search/Clear controls.
+- The search/filter controls use a bordered panel with clearer hierarchy; Search is visually primary, the filter is secondary, and the layout stacks on narrow screens.
 - No data column, existing row, package dependency, lockfile, authentication rule, or CI configuration changed.
 
 ## 4. Errors and Debugging Steps
@@ -63,7 +66,7 @@
 
 - The second committed migration is applied and current; deterministic seed still succeeds.
 - Indexed owner-scoped full-text search works through the API and frontend with existing filters/pagination.
-- Plain partial terms now match longer words (`net` finds `Netflix`), and the empty Search field label remains visibly notched above the outline.
+- Plain partial terms now match longer words (`net` finds `Netflix`), and the Search field uses an accessible external label with no floating outline collision.
 - Final `npm run verify` passed after the follow-up: frontend 32 tests, backend unit 16 tests, PostgreSQL integration 4 tests, backend e2e 50 tests, formatting, lint, strict TypeScript checks, and both production builds.
 - Backend, migration, and frontend Docker images rebuilt successfully with the new migration/search UI.
 - The rebuilt Compose profile detected both migrations with none pending; PostgreSQL, backend, and frontend returned to healthy state without deleting the volume.

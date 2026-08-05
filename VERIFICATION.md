@@ -94,7 +94,7 @@ The first GitHub-hosted run exposed a clean-runner ordering gap: the seed import
 - Database integration inspects the live PostgreSQL index definition for GIN, English `to_tsvector`, and title/notes weights.
 - PostgreSQL-backed e2e tests cover title and notes matches, stemming, plain-word prefix matching (`net` to `Netflix`), title-first relevance, collection and uncategorised filters, bounded pagination totals, injection-shaped punctuation, and two-user isolation.
 - Both result and count queries bind values through `Prisma.sql` and contain authenticated `owner_id` predicates; no unsafe raw query API is used.
-- Frontend tests cover URL encoding, trimmed search combined with the active filter, pagination reset, and the explicitly shrunk Search label that preserves the outlined notch while empty.
+- Frontend tests cover URL encoding, trimmed search combined with the active filter, pagination reset, and the accessible external Search label/placeholder used by the responsive toolbar.
 
 ## Session 12 Container Verification
 
