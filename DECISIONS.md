@@ -131,3 +131,13 @@ Decision: expose the first-priority bonus as authenticated `GET /all`, returning
 Decision: query owned collections and owned bookmarks once each inside a transaction, then group bookmarks in application memory. Do not query bookmarks once per collection and do not add a schema change or dependency.
 
 Reason: the two-query design has constant database query count, produces a consistent overview, and makes privacy predicates explicit on both resource tables. The endpoint is deliberately unpaginated to match the assignment's small-scale “all” bonus; production-scale unbounded data would require a revised bounded or cursor-paginated contract.
+
+## 2026-08-05 - Application Containers Preserve the Database-Only Workflow
+
+Decision: keep PostgreSQL as the default Compose service and place the migration, backend, and frontend services behind the `app` profile. `docker compose up -d` therefore remains compatible with local development, while `docker compose --profile app up --build -d` verifies the production-style stack.
+
+Decision: use multi-stage Node builds, a non-root backend runtime, a one-shot Prisma migration target, and an Nginx static frontend. Health/dependency conditions enforce PostgreSQL healthy, migration completed, backend healthy, then frontend. The existing `start:prod` command is corrected to the actual Nest output at `dist/src/main.js`.
+
+Decision: frontend Auth0/API values are public runtime configuration, not build-time secrets. Nginx generates a non-cacheable `runtime-config.js` after validating a conservative character set. Local Vite loads an empty public fallback then uses `import.meta.env`; the container overrides those values at startup. A Client Secret or token is never accepted or required.
+
+Trade-off: the official Nginx image starts with its standard root entrypoint/master process so it can generate configuration and bind port 80; worker processes use the image's `nginx` account and Compose applies `no-new-privileges`. The backend application itself runs as the non-root `node` user. A stricter arbitrary-UID/read-only Nginx deployment would require writable tmp/cache mounts and is beyond this take-home bonus.
